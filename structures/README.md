@@ -1,0 +1,60 @@
+# Structures Module
+
+## Overview
+This module explores fundamental **Data Structures** by implementing them from scratch or solving classic interview problems. It avoids standard Java Collections (`java.util.Stack`) to demonstrate lower-level understanding of memory, pointers, and algorithmic complexity.
+
+## Components
+
+### 1. `MyDeque` (Doubly Linked List)
+A custom Deque implementation built from scratch using explicit `Node` class with `prev` and `next` pointers.
+- **Why?**: To demonstrate how `java.util.LinkedList` works under the hood.
+- **Complexity**: O(1) for adding/removing from both ends (`addFirst`, `removeLast`, etc.).
+
+### 2. `CustomStack` (Array Implementation)
+A fixed-size stack using a primitive `int[]` array.
+- **Core Concept**: **LIFO** (Last-In, First-Out).
+- **Why avoid `java.util.Stack`?**: The legacy `Stack` class extends `Vector`, making every method `synchronized`. This causes valid performance overhead in single-threaded apps. Modern Java prefers `Deque` (e.g., `ArrayDeque`).
+
+### 3. `MinStack` (O(1) Retrieval)
+A stack that supports `getMin()` in constant time.
+- **Strategy**: **Two Stacks**.
+    - `stack`: Stores all elements.
+    - `minStack`: Stores *only* the minimums.
+- **Logic**: When pushing `val`, if `val <= minStack.peek()`, push it to `minStack` too. When popping, if `val == minStack.peek()`, pop from both.
+
+### 4. `QueueUsingStack` (Amortized Analysis)
+A Queue (FIFO) implemented using only Stacks (LIFO).
+- **Strategy**: **Input vs Output**.
+    - `inputStack`: Accepts new elements.
+    - `outputStack`: Provides elements for `pop`.
+- **Shift Logic**: Only when `outputStack` is empty do we moving *all* elements from `input` to `output`. This reverses the order (LIFO + LIFO = FIFO).
+- **Amortized Complexity**: Although a single `pop` can take O(n) (moving elements), each element is moved exactly once. Over time, the cost per operation is **Amortized O(1)**.
+
+### 5. `BalancedParentheses`
+Solves the classic validation problem `{[()]}` using a Stack.
+- **Mixed Content**: The algorithm explicitly ignores non-bracket characters, allowing it to validate complex strings like code snippets (`if (a[0]) { return; }`) or JSON.
+
+---
+
+## Interview Questions & Answers
+
+### Q1: Why is `java.util.Stack` considered legacy?
+**Answer**: It violates the standard "Vector vs ArrayList" principle. `Stack` extends `Vector`, making all operations `synchronized`. For most single-threaded use cases, this locking overhead is unnecessary. The recommended replacement is `Deque<T> stack = new ArrayDeque<>()`.
+
+### Q2: Explain the "Amortized O(1)" complexity of `QueueUsingStack`.
+**Refers to**: `pop()` method.
+**Answer**:
+- **Best Case**: O(1) if `outputStack` is not empty.
+- **Worst Case**: O(n) if we must move all elements from `inputStack`.
+- **Amortized**: Since we only move an item to `output` *once* during its entire lifecycle in the queue, we spread that O(n) cost across all N elements. Thus, the average cost per element works out to constant time O(1).
+
+### Q3: What is the trade-off in `MinStack`?
+**Answer**: We trade **Space for Time**.
+- We get O(1) time complexity for `getMin()`.
+- We pay O(n) space complexity for the auxiliary `minStack` to store helper data.
+
+### Q4: When would you use a Linked List Stack over an Array Stack?
+**Refers to**: `MyDeque` vs `CustomStack`.
+**Answer**:
+- **Array Stack**: Better cache locality (contiguous memory), less memory overhead (no pointers). But requires resizing (copying array) when full.
+- **Linked List**: Dynamic sizing (no resize cost), but higher memory per element (storing pointers) and worse cache locality (nodes scattered in heap).

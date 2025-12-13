@@ -12,6 +12,7 @@
         <module>portfolio</module>
         <module>event</module>
         <module>regtech</module>
+        <module>structures</module>
     </modules>
 
     <properties>
