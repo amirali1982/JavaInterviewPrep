@@ -15,9 +15,12 @@ javainterviewprep/
 ├── event/              # Module: Event Dispatching System
 │   ├── pom.xml
 │   └── src/main/java/com/interview/event/...
-└── regtech/            # Module: Validation Rules Engine
+├── regtech/            # Module: Validation Rules Engine
+│   ├── pom.xml
+│   └── src/main/java/com/interview/regtech/...
+└── structures/         # Module: Data Structures (Stack, Deque, Queue)
     ├── pom.xml
-    └── src/main/java/com/interview/regtech/...
+    └── src/main/java/com/interview/structures/...
 ```
 
 ### Installation & Build
@@ -43,6 +46,11 @@ A flexible rules engine for validating financial transactions.
 - **Key Feature**: Implements the **Strategy Pattern** to define validation logic.
 - **Design Principle**: Adheres to **Open/Closed Principle**—new rules can be added without modifying the engine.
 
+### 4. Data Structures (`com.interview.structures`)
+Focuses on low-level data structure implementations to demonstrate algorithmic understanding.
+- **Key Feature**: Custom implementations of **Stack**, **Deque**, and **Queue** without standard collections.
+- **Algorithms**: Includes **O(1) MinStack** and **Amortized O(1) Queue** using Stacks.
+
 ---
 
 ## Senior Java Developer Concepts
@@ -53,7 +61,11 @@ This project implements several advanced concepts discussed in interviews:
 - **Snapshot Iteration**: Used in `EventDispatcher` via `CopyOnWriteArrayList`. This ensures that when we iterate through listeners to dispatch an event, we are looking at a stable "snapshot" of the list. Even if another thread adds a listener during dispatch, it won't affect the current loop and won't throw `ConcurrentModificationException`.
 - **Happens-Before Relationship**: `ExecutorService` in `EventDispatcher` establishes a happens-before relationship between the submission of a task (event) and its execution, ensuring visibility of data across threads.
 
-### 2. Design Patterns
+### 2. Algorithmic Complexity
+- **Amortized Analysis**: Demonstrated in `QueueUsingStack`. While a single `pop` operation might cost O(n) (moving elements between stacks), it happens rarely enough that the *average* cost per operation over time is **O(1)**.
+- **Space-Time Tradeoff**: Demonstrated in `MinStack`. We achieve **O(1)** time complexity for retrieving the minimum element by using **O(n)** extra space (an auxiliary stack).
+
+### 3. Design Patterns
 - **Strategy Pattern**: In `RegTech`, the `Rule<T>` interface is the strategy. The `RegTechEngine` accepts any "strategy" (Rule) to validate the context. This decouples the *what* (validation logic) from the *how* (engine execution).
 - **Observer Pattern**: The `EventDispatcher` is the subject and `EventListener`s are observers. Key for decoupling components—the code firing an event doesn't need to know who is listening.
 - **Immutable Objects**: `Stock` and `TransferContext` are implemented as **Java Records**. Immutable objects are inherently thread-safe because their state cannot change after creation, eliminating synchronization needs for read-only data.
@@ -87,6 +99,11 @@ By *containing* a map (`private final Map holdings`), the `Portfolio` class enca
 **Refers to**: `com.interview.event.EventDispatcher`
 **Answer**: If we created a `new Thread()` for every event, a surge in events could exhaust system memory limits (Out of Memory Error).
 By using an `ExecutorService` (in the constructor), we can pass in a bounded pool (e.g., `Executors.newFixedThreadPool(10)`). This limits the maximum concurrency to 10 active threads. Excess tasks queue up rather than crashing the JVM, providing **Backpressure** management and predictable resource usage.
+
+### Q6: Why avoid `java.util.Stack`?
+**Refers to**: `com.interview.structures.CustomStack`
+**Answer**: `java.util.Stack` is a legacy class that extends `Vector`. This means every single method is `synchronized`, causing unnecessary thread-locking overhead in single-threaded applications.
+**Modern Approach**: Use `Deque<T> stack = new ArrayDeque<>()`. It is faster, not synchronized, and provides a cleaner API (stack and queue methods).
 
 ---
 
