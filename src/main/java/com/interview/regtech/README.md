@@ -14,7 +14,7 @@ This module implements a flexible **Rules Engine** for validating Share Transfer
 - **`TransferContext`**: A **Java Record** holding immutable context (Sender, Receiver, Stock, Quantity).
 - **Fail-Fast vs Fail-Safe**: The engine implements fail-fast logic (returns on first error). This is efficient for blocking transactions but can be switched to "collect all errors" if needed for UI feedback.
 
-## Top Interview Questions & Answers
+## Implementation-Specific Interview Questions
 
 ### 1. Why use a Rules Engine (Strategy Pattern) instead of a simple `switch` or `if-else` block?
 **Refers to**: `com.interview.regtech.RegTechEngine`
@@ -40,3 +40,26 @@ Thread safety depends on the Rules.
 **Answer**: Since Java 14, **Records** reduce boilerplate for data carriers. In a Rules Engine, the context is purely for carrying data to rules. Using a Record ensures:
 - **Immutability**: A rule cannot accidentally change the `quantity` and affect subsequent rules.
 - **Readability**: The intent "this is just data" is clear.
+
+---
+
+## Broader Conceptual Interview Questions (Design Patterns)
+
+### 5. Strategy Pattern vs State Pattern - What is the difference?
+**Concept**: OO Design Patterns.
+**Answer**: Both share the same class structure (Context delegates to an Interface), but the *intent* differs.
+- **Strategy Pattern** (Used here): The client *chooses* the algorithm (Rule) to be used. Implementation doesn't usually change during the object's life.
+- **State Pattern**: The object *changes* its internal strategy automatically as its state changes (e.g., A TCP Connection switching from `Listening` to `Connected` state). The transition logic is often embedded within the states themselves.
+
+### 6. What is Dependency Injection (DI) and why is it useful?
+**Concept**: SOLID (Dependency Inversion).
+**Answer**: DI is a technique where an object receives other objects that it depends on (dependencies), rather than creating them itself.
+- **Example**: `SenderHasBalanceRule` does NOT do `new PortfolioRepository()`. It receives it in the constructor.
+- **Benefit**:
+    - **Decoupling**: Classes don't need to know how to construct their dependencies.
+    - **Testability**: We can inject a **Mock** repository during testing (as seen in `SenderHasBalanceRuleTest`) to simulate different scenarios without needing a real database.
+
+### 7. Explain the Liskov Substitution Principle (LSP).
+**Concept**: SOLID.
+**Answer**: LSP states that objects of a superclass should be replaceable with objects of its subclasses without breaking the application.
+- **In practice**: If `Rule<T>` throws a `RuntimeException` while other rules return `RuleResult.failure()`, it violates LSP because the Engine expects a result, not a crash. All implementations of an interface must adhere to the contract defined by that interface.

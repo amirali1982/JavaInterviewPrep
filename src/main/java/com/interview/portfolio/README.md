@@ -16,7 +16,7 @@ We chose `record Stock(...)` because stocks in this context are **Value Objects*
 ### ConcurrentHashMap (`holdings`)
 We use `holdings.merge()` and `holdings.compute()`. These are **atomic operations**. Even without `synchronized`, `merge` guarantees that the read-modify-write cycle (Read qty -> Add -> Write qty) happens atomically for that key.
 
-## Interview Questions & Answers
+## Implementation-Specific Interview Questions
 
 ### 1. In `Portfolio.java`, why is `getHoldings()` returning `Collections.unmodifiableMap`?
 **Refers to**: `com.interview.portfolio.Portfolio.getHoldings()`
@@ -44,3 +44,29 @@ This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", 
 - **Declarative**: Streams say *what* we want (`filter(sector).collect()`) rather than *how* (indexes, temporary lists).
 - **Parallizable**: We can easily switch to `parallelStream()` if the dataset is huge (though not always faster).
 - **Readability**: For complex filtering/mapping chains, Streams are often more readable than nested loops.
+
+---
+
+## Broader Conceptual Interview Questions (Collections & Streams)
+
+### 5. How does a HashMap handle collisions internally?
+**Concept**: Algorithms & Data Structures.
+**Answer**:
+- **Chaining**: When multiple keys have the same hash (Collision), they are stored in a linked list (chain) at that bucket index.
+- **Treeification (Java 8+)**: If a chain grows too long (threshold is 8), Java converts the Linked List into a **Red-Black Tree**. This improves lookup performance from O(n) (list scan) to O(log n) (tree search), preventing Denial-of-Service attacks based on hash collisions.
+
+### 6. Difference between `map()` and `flatMap()` in Streams?
+**Concept**: Functional Programming.
+**Answer**:
+- **`map`**: Transforms each element one-to-one.
+    - `Stream<String> -> map(s -> s.length()) -> Stream<Integer>`
+- **`flatMap`**: Transforms each element one-to-many. It "flattens" the resulting streams into a single stream.
+    - Example: You have a `List<Order>`. Each `Order` has `List<LineItem>`.
+    - `orders.stream().flatMap(order -> order.getLineItems().stream())` gives you a single `Stream<LineItem>`.
+
+### 7. Checked vs Unchecked Exceptions?
+**Concept**: Error Handling.
+**Answer**:
+- **Checked (extends `Exception`)**: Compiler forces you to `catch` or `throws`. Represents recoverable error conditions (e.g., `IOException` file not found).
+- **Unchecked (extends `RuntimeException`)**: Compiler does not force handling. Represents programming errors (e.g., `NullPointerException`, `IndexOutOfBounds`).
+- **Trend**: Modern framworks (Spring) and libraries favour Unchecked exceptions to reduce boilerplate and "catch-ignore" blocks.

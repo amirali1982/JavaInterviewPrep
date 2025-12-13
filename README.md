@@ -56,7 +56,7 @@ This project implements several advanced concepts discussed in interviews:
 
 ---
 
-## Interview Questions & Answers
+## Interview Questions & Answers (Code Specific)
 
 ### Q1: In the `EventDispatcher`, why use `CopyOnWriteArrayList` instead of a wrapper like `Collections.synchronizedList`?
 **Refers to**: `com.interview.event.EventDispatcher`
@@ -83,3 +83,29 @@ By *containing* a map (`private final Map holdings`), the `Portfolio` class enca
 **Refers to**: `com.interview.event.EventDispatcher`
 **Answer**: If we created a `new Thread()` for every event, a surge in events could exhaust system memory limits (Out of Memory Error).
 By using an `ExecutorService` (in the constructor), we can pass in a bounded pool (e.g., `Executors.newFixedThreadPool(10)`). This limits the maximum concurrency to 10 active threads. Excess tasks queue up rather than crashing the JVM, providing **Backpressure** management and predictable resource usage.
+
+---
+
+## Broader Conceptual Interview Questions (JVM & General)
+
+### Q6: Explain the Java Memory Model (Stack vs Heap).
+**Concept**: JVM Internals.
+**Answer**:
+- **Heap**: Shared memory area where *all Objects* are stored. It is garbage collected. In our project, the `Portfolio` instance and all `Stock` objects live here.
+- **Stack**: Thread-local memory storage. Stores primitive local variables and method call frames. References to objects exist on the stack, but point to the Heap.
+- **Visibility**: Changes in Heap memory (shared) might not be strictly visible to all threads instantly unless specific barriers (like `volatile`, `synchronized`, or `concurrent locks`) are used to enforce a "Happens-Before" relationship.
+
+### Q7: How does Garbage Collection worked? (Generational Hypothesis)
+**Concept**: Memory Management.
+**Answer**: Java GC is based on the **Weak Generational Hypothesis**: "Most objects die young".
+- **Young Generation (Eden + Survivor spaces)**: New objects are allocated here. Minor GC runs frequently here and is very fast (copying collectors).
+- **Old Generation**: Objects that survive multiple Minor GCs are moved here. Major GC/Full GC runs here, which is slower.
+- Modern GCs (G1, ZGC) optimize this to minimize "Stop-The-World" pauses. In our application, short-lived events (`TransferContext`) would be collected cheaply in Eden, while the long-lived `Portfolio` stays in Old Gen.
+
+### Q8: What are the key features introduced in Java 17 (LTS)?
+**Concept**: Java Ecosystem.
+**Answer**:
+- **Records (JEP 395)**: Immutable data carriers (used in our `Stock` class).
+- **Sealed Classes (JEP 409)**: Restrict which other classes may extend or implement them, allowing for exhaustive pattern matching.
+- **Pattern Matching for switch (Preview in 17, Standard later)**: Simplifies switch statements.
+- **Strong Encapsulation of JDK Internals**: Prevents illegal access to internal APIs via reflection (Project Jigsaw completion).
