@@ -34,31 +34,6 @@ A Queue (FIFO) implemented using only Stacks (LIFO).
 Solves the classic validation problem `{[()]}` using a Stack.
 - **Mixed Content**: The algorithm explicitly ignores non-bracket characters, allowing it to validate complex strings like code snippets (`if (a[0]) { return; }`) or JSON.
 
----
-
-## Interview Questions & Answers
-
-### Q1: Why is `java.util.Stack` considered legacy?
-**Answer**: It violates the standard "Vector vs ArrayList" principle. `Stack` extends `Vector`, making all operations `synchronized`. For most single-threaded use cases, this locking overhead is unnecessary. The recommended replacement is `Deque<T> stack = new ArrayDeque<>()`.
-
-### Q2: Explain the "Amortized O(1)" complexity of `QueueUsingStack`.
-**Refers to**: `pop()` method.
-**Answer**:
-- **Best Case**: O(1) if `outputStack` is not empty.
-- **Worst Case**: O(n) if we must move all elements from `inputStack`.
-- **Amortized**: Since we only move an item to `output` *once* during its entire lifecycle in the queue, we spread that O(n) cost across all N elements. Thus, the average cost per element works out to constant time O(1).
-
-### Q3: What is the trade-off in `MinStack`?
-**Answer**: We trade **Space for Time**.
-- We get O(1) time complexity for `getMin()`.
-- We pay O(n) space complexity for the auxiliary `minStack` to store helper data.
-
-### Q4: When would you use a Linked List Stack over an Array Stack?
-**Refers to**: `MyDeque` vs `CustomStack`.
-**Answer**:
-- **Array Stack**: Better cache locality (contiguous memory), less memory overhead (no pointers). But requires resizing (copying array) when full.
-- **Linked List**: Dynamic sizing (no resize cost), but higher memory per element (storing pointers) and worse cache locality (nodes scattered in heap).
-
 ### 6. `DynamicArray` (Resizing List)
 A generic array wrapper that mimics `ArrayList`.
 - **Logic**: When full, `grow()` creates a new array of double size and copies elements.
@@ -99,3 +74,29 @@ Adjacency List implementation (`Map<T, List<T>>`).
 Tree optimized for string searching.
 - **Complexity**: O(L) where L is word length. Faster than HashMap for prefix searches.
 - **Use Case**: Autocomplete, Spell Checker.
+
+---
+
+## Interview Questions & Answers
+
+### Q1: Why is `java.util.Stack` considered legacy?
+**Answer**: It violates the standard "Vector vs ArrayList" principle. `Stack` extends `Vector`, making all operations `synchronized`. For most single-threaded use cases, this locking overhead is unnecessary. The recommended replacement is `Deque<T> stack = new ArrayDeque<>()`.
+
+### Q2: Explain the "Amortized O(1)" complexity of `QueueUsingStack`.
+**Refers to**: `pop()` method.
+**Answer**:
+- **Best Case**: O(1) if `outputStack` is not empty.
+- **Worst Case**: O(n) if we must move all elements from `inputStack`.
+- **Amortized**: Since we only move an item to `output` *once* during its entire lifecycle in the queue, we spread that O(n) cost across all N elements. Thus, the average cost per element works out to constant time O(1).
+
+### Q3: What is the trade-off in `MinStack`?
+**Answer**: We trade **Space for Time**.
+- We get O(1) time complexity for `getMin()`.
+- We pay O(n) space complexity for the auxiliary `minStack` to store helper data.
+
+### Q4: When would you use a Linked List Stack over an Array Stack?
+**Refers to**: `MyDeque` vs `CustomStack`.
+**Answer**:
+- **Array Stack**: Better cache locality (contiguous memory), less memory overhead (no pointers). But requires resizing (copying array) when full.
+- **Linked List**: Dynamic sizing (no resize cost), but higher memory per element (storing pointers) and worse cache locality (nodes scattered in heap).
+
