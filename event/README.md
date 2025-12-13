@@ -49,9 +49,9 @@ This module demonstrates a flexible, type-safe Event Dispatching system using th
 **Answer**:
 - **`synchronized`**: Native keyword. Simpler, automatically releases lock on exception/return. Preferred for most cases due to readability and compiler optimizations.
 - **`ReentrantLock`**: A class. Provides advanced features:
-    - **Fairness**: Can ensure FIFO locking order (prevent starvation).
-    - **`tryLock()`**: Can attempt to get a lock and give up (or wait with timeout), preventing deadlocks.
-    - **Unpaired locking**: Can lock in one method and unlock in another (risky but flexible).
+- **Fairness**: Can ensure FIFO locking order (prevent starvation).
+- **`tryLock()`**: Can attempt to get a lock and give up (or wait with timeout), preventing deadlocks.
+- **Unpaired locking**: Can lock in one method and unlock in another (risky but flexible).
 
 ### 6. What is the `volatile` keyword?
 **Concept**: Memory Visibility.

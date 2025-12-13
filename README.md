@@ -4,22 +4,26 @@
 This repository contains a set of **Java 17** modules designed to demonstrate core competencies required for a Senior Java Developer role. It focuses on **Clean Architecture**, **Concurrency**, **Object-Oriented Design**, and **Testability**. The code serves as both a reference implementation for common interview tasks and a study guide for technical discussions.
 
 ## Project Structure
-The codebase is organized into domain-specific packages under `src/main/java/com/interview`:
+The codebase is a **Maven Multi-Module Project** organized as follows:
 
 ```
-src/main/java/com/interview/
-├── event/          # Event Dispatcher System (Observer Pattern, Concurrency)
-│   ├── Event.java
-│   ├── EventDispatcher.java
-│   └── EventListener.java
-├── portfolio/      # Portfolio Management (Thread usage, Collections)
-│   ├── Portfolio.java
-│   ├── Stock.java (Record)
-│   └── PortfolioService.java
-└── regtech/        # Validation Rules Engine (Strategy Pattern, SOLID)
-    ├── RegTechEngine.java
-    ├── Rule.java
-    └── rules/
+javainterviewprep/
+├── pom.xml             # Root Parent POM
+├── portfolio/          # Module: Stock & Portfolio Management
+│   ├── pom.xml
+│   └── src/main/java/com/interview/portfolio/...
+├── event/              # Module: Event Dispatching System
+│   ├── pom.xml
+│   └── src/main/java/com/interview/event/...
+└── regtech/            # Module: Validation Rules Engine
+    ├── pom.xml
+    └── src/main/java/com/interview/regtech/...
+```
+
+### Installation & Build
+To build the entire project including all modules, run from the root:
+```sh
+mvn clean install
 ```
 
 ## Key Modules
