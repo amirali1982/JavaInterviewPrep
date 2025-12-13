@@ -72,3 +72,18 @@ This module demonstrates a flexible, type-safe Event Dispatching system using th
 - **Example**: Garbage Collector, heartbeat monitors.
 - **Behavior**: If only Daemon threads are left running, the JVM shuts down abruptly (effectively killing them).
 - **Code**: `thread.setDaemon(true)` before starting it.
+
+### 9. Compare `CachedThreadPool` vs `FixedThreadPool`.
+**Refers to**: `EventDispatcher` constructor logic.
+**Answer**:
+- **FixedThreadPool(n)**: Reuses `n` threads. Good for predictable load.
+- **CachedThreadPool**: Creates new threads as needed, reuses idle ones. Good for many short-lived tasks but risky (can spawn infinite threads).
+- **ScheduledThreadPool**: For delayed or periodic tasks.
+- **CompletableFuture**: Modern, functional way to handle async tasks (Promises) compared to raw `Future`.
+
+### 10. Explain the PECS Principle (Producer Extends, Consumer Super).
+**Concept**: Generics.
+**Answer**:
+- **Producer Extends**: If you want to read T modifiers from a collection, use `<? extends T>`. Example: `List<? extends Number>`. You can get Numbers out, but cannot put them in (because it might be a List of Integers).
+- **Consumer Super**: If you want to put T items into a collection, use `<? super T>`.
+- **In our Code**: `EventListener<? extends Event>` means the listener consumes specific subtypes of Event.

@@ -132,3 +132,31 @@ By using an `ExecutorService` (in the constructor), we can pass in a bounded poo
 - **Sealed Classes (JEP 409)**: Restrict which other classes may extend or implement them, allowing for exhaustive pattern matching.
 - **Pattern Matching for switch (Preview in 17, Standard later)**: Simplifies switch statements.
 - **Strong Encapsulation of JDK Internals**: Prevents illegal access to internal APIs via reflection (Project Jigsaw completion).
+
+### Q9: Fail-Fast vs Fail-Safe Iterators.
+**Concept**: Concurrency and Collections.
+**Answer**:
+- **Fail-Fast**: Throws `ConcurrentModificationException` immediately if the collection is modified while iterating (e.g., `ArrayList`, `HashMap`). Uses an internal `modCount`.
+- **Fail-Safe**: Works on a clone or snapshot of the collection, avoiding exceptions (e.g., `CopyOnWriteArrayList`, `ConcurrentHashMap`).
+
+### Q10: Explanation of Java Reference Types.
+**Concept**: Memory Management.
+**Answer**:
+- **Strong Reference**: Standard `Object o = new Object()`. Never collected while reachable.
+- **Soft Reference**: Collected only if JVM is almost out of memory (Good for Caching).
+- **Weak Reference**: Collected eagerly on next GC cycle (Used in `WeakHashMap`).
+- **Phantom Reference**: Used for post-mortem cleanup interactions.
+
+### Q11: Method Area: PermGen vs Metaspace.
+**Concept**: JVM Memory Structure.
+**Answer**:
+- **PermGen (Java 7 and older)**: Stored class metadata (static vars, method code). It was contiguous with the Heap and had a fixed size, often causing `java.lang.OutOfMemoryError: PermGen space`.
+- **Metaspace (Java 8+)**: Replaced PermGen. It uses **Native Memory** (OS memory), not Heap. It grows automatically by default, significantly reducing OOM errors related to class loading.
+
+### Q12: Basic GC Tuning Flags.
+**Concept**: Performance Engineering.
+**Answer**:
+- **`-Xms` / `-Xmx`**: Initial and Max Heap size. Setting them equal prevents resizing overhead.
+- **`-XX:+UseG1GC`**: Use G1 Garbage Collector (Standard for server apps > 4GB Heap).
+- **`-XX:MaxGCPauseMillis=200`**: Sets a target for max pause time (soft goal).
+- **`-XX:+HeapDumpOnOutOfMemoryError`**: Critical for production to capture state when a crash occurs.

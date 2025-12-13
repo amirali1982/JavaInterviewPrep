@@ -63,3 +63,11 @@ Thread safety depends on the Rules.
 **Concept**: SOLID.
 **Answer**: LSP states that objects of a superclass should be replaceable with objects of its subclasses without breaking the application.
 - **In practice**: If `Rule<T>` throws a `RuntimeException` while other rules return `RuleResult.failure()`, it violates LSP because the Engine expects a result, not a crash. All implementations of an interface must adhere to the contract defined by that interface.
+
+### 8. Java Functional Interfaces in simple terms.
+**Refers to**: `Rule<T>`.
+**Answer**:
+- **Predicate<T>**: Takes T, returns boolean (`stream.filter`).
+- **Function<T, R>**: Takes T, returns R (`stream.map`).
+- **Consumer<T>**: Takes T, returns void (`stream.forEach`).
+- **Supplier<T>**: Takes nothing, returns T (`Optional.orElseGet`).

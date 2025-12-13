@@ -70,3 +70,18 @@ This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", 
 - **Checked (extends `Exception`)**: Compiler forces you to `catch` or `throws`. Represents recoverable error conditions (e.g., `IOException` file not found).
 - **Unchecked (extends `RuntimeException`)**: Compiler does not force handling. Represents programming errors (e.g., `NullPointerException`, `IndexOutOfBounds`).
 - **Trend**: Modern framworks (Spring) and libraries favour Unchecked exceptions to reduce boilerplate and "catch-ignore" blocks.
+
+### 8. What is the contract between `equals()` and `hashCode()`?
+**Refers to**: `Record Stock` implies this automatically.
+**Answer**:
+1. If `x.equals(y)` is true, `x.hashCode()` MUST equal `y.hashCode()`.
+2. If `hashCode()` is different, objects are definitely not equal.
+3. If `hashCode()` is same, objects MIGHT be equal (collision).
+**Violation**: If you override equals but not hashCode, storing objects in a HashMap will break (you'll lose items).
+
+### 9. Why should you avoid `Optional` in fields?
+**Concept**: Java 8 Best Practices.
+**Answer**:
+- **Serializable**: `Optional` does not implement `Serializable`. If your class needs to be serialized (e.g., for caching/sending over network), `Optional` fields will fail.
+- **Memory**: It adds logical overhead (wrapping object).
+- **Best Practice**: Use `Optional` only as a **return type** for methods to indicate "no result", forcing the caller to handle nullability.

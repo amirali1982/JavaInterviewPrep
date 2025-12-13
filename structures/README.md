@@ -83,3 +83,19 @@ Demonstrates thread-safe queuing using explicit Locks.
 Least Recently Used replacement policy (Simulates `LinkedHashMap`).
 - **Design**: HashMap + Doubly Linked List.
 - **O(1)** access and update. New/accessed items move to head; old items evicted from tail.
+
+### 11. `BinarySearchTree` (Sorted Tree)
+Recursive tree implementation.
+- **Logic**: Left child < Parent < Right child.
+- **Use Case**: Foundation for `TreeMap`/`TreeSet` (though those use Red-Black balancing).
+
+### 12. `Graph` (Network)
+Adjacency List implementation (`Map<T, List<T>>`).
+- **Algorithms**:
+    - **BFS** (Queue): Shortest path in unweighted graphs.
+    - **DFS** (Recursion): Path finding, cycle detection.
+
+### 13. `Trie` (Prefix Tree)
+Tree optimized for string searching.
+- **Complexity**: O(L) where L is word length. Faster than HashMap for prefix searches.
+- **Use Case**: Autocomplete, Spell Checker.
