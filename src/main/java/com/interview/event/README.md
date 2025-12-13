@@ -1,30 +1,41 @@
 # Event Listening System Module
 
 ## Overview
-This module demonstrates a flexible, type-safe Event Dispatching system using the Observer pattern. It supports both synchronous and asynchronous event processing, showcasing advanced Java concurrency usage.
+This module demonstrates a flexible, type-safe Event Dispatching system using the **Observer Pattern**, written in **Java 17**. It supports both synchronous and asynchronous event processing, showcasing advanced Java concurrency usage.
 
 ## Key Features
-1.  **Generics**: The `EventListener<T>` interface uses Java Generics to ensure type safety. Listeners only receive events they are interested in, eliminating the need for `instanceof` checks and casting in the client code.
+1.  **Generics**: The `EventListener<T>` interface uses Java Generics to ensure type safety. Listeners only receive events they are interested in.
 2.  **Concurrency / Thread Safety**:
     *   `ConcurrentHashMap`: Used for the listener registry to allow concurrent registration/lookup.
-    *   `CopyOnWriteArrayList`: Used for the list of listeners for a specific event. This is crucial because it allows iterating over listeners (during dispatch) while other threads might be adding/removing listeners, preventing `ConcurrentModificationException` without explicit locking.
-3.  **Asynchronous Processing**: The `EventDispatcher` can optionally use an `ExecutorService` (Strategy Pattern) to offload event processing to a thread pool, decoupling event emission from execution.
+    *   `CopyOnWriteArrayList`: Used for the list of listeners.
+3.  **Asynchronous Processing**: The `EventDispatcher` can optionally use an `ExecutorService` to offload event processing to a thread pool.
 
 ## Implementation Details
--   **Event**: A marker interface to identify event objects.
--   **EventListener**: A functional interface making it easy to use with Lambdas.
--   **EventDispatcher**: The core engine. It manages a map of `Class<? extends Event>` to `List<EventListener>`.
+-   **Java 17**: Uses modern syntax and library features.
+-   **`CopyOnWriteArrayList`**: A specialized list where all mutative operations (add, set, remove) implement a fresh copy of the underlying array.
 
 ## Interview Questions & Answers
 
-### 1. Why use `CopyOnWriteArrayList` for the listeners list?
-**Answer**: `CopyOnWriteArrayList` is thread-safe and efficient for scenarios where **reads (event dispatching) vastly outnumber writes (listener registration)**. When a listener is added, it creates a new copy of the underlying array, ensuring that any iterator currently traversing the list (e.g., during a dispatch) sees a stable snapshot and doesn't throw `ConcurrentModificationException`.
+### 1. In `EventDispatcher`, you used `CopyOnWriteArrayList`. what is the trade-off?
+**Refers to**: `com.interview.event.EventDispatcher.listeners`
+**Answer**:
+- **Benefit**: It allows traversing the list (dispatching events) without locking, which is extremely fast and prevents `ConcurrentModificationException`.
+- **Cost**: **Memory & Write Performance**. Every time a listener is added or removed, the *entire* array is copied.
+- **Relevance**: This is the perfect choice for an Event System where **events are fired frequently (Thousands/sec)** but **listeners are registered rarely (Startup time)**. If listeners were added/removed constantly at runtime, this would be a poor choice due to memory churn.
 
-### 2. Can you explain the `<? extends Event>` wildcard in the Map?
-**Answer**: The Map is defined as `Map<Class<? extends Event>, List<EventListener<? extends Event>>>`. This upper-bounded wildcard allows the map to hold keys that are subclasses of `Event` and values that are lists of listeners for those events. It provides flexibility while maintaining a connection to the `Event` hierarchy.
+### 2. How does `ExecutorService` change the exception handling behavior?
+**Refers to**: `com.interview.event.EventDispatcher.dispatch()`
+**Answer**:
+- **Synchronous (Direct call)**: If a listener throws an unchecked Exception, it propagates up the stack and could crash the dispatcher loop (stopping other listeners).
+- **Asynchronous (`executor.submit`)**: The Exception is captured within the `Future` returned by submit (which we are ignoring here) or handled by the Thread Pool's `UncaughtExceptionHandler`. It isolates the failure; one broken listener won't stop others from executing their separate tasks.
 
-### 3. Usage of `ExecutorService` vs creating `new Thread()`?
-**Answer**: Creating a new thread for every event is expensive (stack allocation, OS overhead). An `ExecutorService` (like a cached or fixed thread pool) reuses existing threads, providing better resource management and preventing the system from crashing under load (e.g., "Out of Memory" from too many threads).
+### 3. Can you explain the `<? extends Event>` wildcard in the Map definition?
+**Refers to**: `private final Map<Class<? extends Event>, List<EventListener<? extends Event>>> listeners`
+**Answer**: This relies on **Upper-Bounded Wildcards**.
+- It guarantees that keys are specifically subclasses of `Event` (not just any Object).
+- It allows the values to be Lists of Listeners that handle *some subtype* of Event.
+- This provides type safety at compile time, ensuring we don't accidentally register a String listener into an Event map.
 
-### 4. How does the generic type safety work here?
-**Answer**: Although the internal Map stores listeners with wildcards due to type erasure, the public API `register(Class<T> type, EventListener<T> listener)` enforces that the listener matches the event class at compile time. Inside `dispatch`, we perform a safe cast because we know the structure invariant holds true.
+### 4. What happens if two threads call `register()` for the same event type at the same time?
+**Refers to**: `listeners.computeIfAbsent(...)`
+**Answer**: We use `ConcurrentHashMap.computeIfAbsent()`. This method is **atomic**. Use of this method ensures that if multiple threads try to initialize the list for a new Event type simultaneously, only *one* thread will create the new `CopyOnWriteArrayList` and put it in the map. The other thread will get the existing list. This prevents "lost updates" race conditions.

@@ -1,7 +1,7 @@
 # Java Interview Preparation Project
 
 ## Overview
-This repository contains a set of Java modules designed to demonstrate core competencies required for a Senior Java Developer role. It focuses on **Clean Architecture**, **Concurrency**, **Object-Oriented Design**, and **Testability**. The code serves as both a reference implementation for common interview tasks and a study guide for technical discussions.
+This repository contains a set of **Java 17** modules designed to demonstrate core competencies required for a Senior Java Developer role. It focuses on **Clean Architecture**, **Concurrency**, **Object-Oriented Design**, and **Testability**. The code serves as both a reference implementation for common interview tasks and a study guide for technical discussions.
 
 ## Project Structure
 The codebase is organized into domain-specific packages under `src/main/java/com/interview`:
@@ -27,7 +27,7 @@ src/main/java/com/interview/
 ### 1. Portfolio & Stocks (`com.interview.portfolio`)
 Demonstrates core OO modeling and thread-safe state management.
 - **Key Feature**: `Portfolio` uses `ConcurrentHashMap` to handle concurrent additions/removals of stock.
-- **Modern Java**: Uses **Java Records** (`Stock`) for immutable data carriers.
+- **Modern Java**: Uses **Java 17 Records** (`Stock`) for immutable data carriers.
 
 ### 2. Event System (`com.interview.event`)
 A generic, thread-safe Event Bus implementation.
@@ -45,34 +45,41 @@ A flexible rules engine for validating financial transactions.
 This project implements several advanced concepts discussed in interviews:
 
 ### 1. Concurrency & Multithreading
-- **`ConcurrentHashMap`**: Used in `Portfolio` and `EventDispatcher` for thread-safe map operations without locking the entire map (unlike `Hashtable` or `Collections.synchronizedMap`).
-- **`CopyOnWriteArrayList`**: Used for `listeners` list. Ideal for "read-mostly" scenarios where traversal happens frequently (dispatching) but modification (registering) is rare. It prevents `ConcurrentModificationException`.
-- **`ExecutorService`**: Decouples task submission from execution, allowing async event handling.
+- **Lock Striping**: Used in `Portfolio`'s `ConcurrentHashMap`. Unlike `Hashtable` which locks the whole object, `ConcurrentHashMap` locks only specific buckets (segments), allowing multiple threads to write to different parts of the map simultaneously.
+- **Snapshot Iteration**: Used in `EventDispatcher` via `CopyOnWriteArrayList`. This ensures that when we iterate through listeners to dispatch an event, we are looking at a stable "snapshot" of the list. Even if another thread adds a listener during dispatch, it won't affect the current loop and won't throw `ConcurrentModificationException`.
+- **Happens-Before Relationship**: `ExecutorService` in `EventDispatcher` establishes a happens-before relationship between the submission of a task (event) and its execution, ensuring visibility of data across threads.
 
 ### 2. Design Patterns
-- **Strategy Pattern**: The `Rule<T>` interface allows swapping validation logic at runtime.
-- **Observer Pattern**: The `EventDispatcher` allows components to react to events without tight coupling.
-- **Immutable Objects**: `Stock` and `TransferContext` are `Records`. Immutability is crucial for multithreaded safety and hash key consistency.
-
-### 3. Clean Architecture
-- **Dependency Inversion**: High-level modules (`RegTechEngine`) depend on abstractions (`Rule`, `PortfolioRepository`) rather than concrete details.
-- **Interface Segregation**: Small, focused interfaces like `MarketProvider`.
+- **Strategy Pattern**: In `RegTech`, the `Rule<T>` interface is the strategy. The `RegTechEngine` accepts any "strategy" (Rule) to validate the context. This decouples the *what* (validation logic) from the *how* (engine execution).
+- **Observer Pattern**: The `EventDispatcher` is the subject and `EventListener`s are observers. Key for decoupling components—the code firing an event doesn't need to know who is listening.
+- **Immutable Objects**: `Stock` and `TransferContext` are implemented as **Java Records**. Immutable objects are inherently thread-safe because their state cannot change after creation, eliminating synchronization needs for read-only data.
 
 ---
 
 ## Interview Questions & Answers
 
-### Q1: Why use `ConcurrentHashMap` over `Hashtable` or `synchronizedMap`?
-**Answer**: `Hashtable` and `synchronizedMap` lock the entire map for every operation, causing contention in high-concurrency scenarios. `ConcurrentHashMap` uses **lock striping** (bucket-level locking) and CAS (Compare-And-Swap) operations, allowing multiple threads to read and write concurrently with high throughput.
+### Q1: In the `EventDispatcher`, why use `CopyOnWriteArrayList` instead of a wrapper like `Collections.synchronizedList`?
+**Refers to**: `com.interview.event.EventDispatcher`
+**Answer**: `Collections.synchronizedList` makes individual operations atomic, but *iteration* requires manual locking. If we used it in `dispatch()`, we would have to lock the entire list while looping through listeners. This blocks any thread trying to register a new listener until dispatch finishes (performance bottleneck).
+`CopyOnWriteArrayList`, used in the example, allows lock-free iteration. Iterators work on a snapshot of the array, so dispatching is fast and non-blocking, which is ideal for event systems where reading (dispatching) happens much more often than writing (registering).
 
-### Q2: Explain the Open/Closed Principle with an example from this project.
-**Answer**: The **Open/Closed Principle** states that software entities should be open for extension but closed for modification. In the `RegTech` module, the `RegTechEngine` is "closed" because its logic doesn't change. However, it is "open" for extension because we can add new validation requirements (e.g., `RestrictedStockRule`) simply by creating a new class implementing `Rule` and registering it, without touching the engine code.
+### Q2: How does the `RegTechEngine` demonstrate the Open/Closed Principle?
+**Refers to**: `com.interview.regtech.RegTechEngine`
+**Answer**: The **Open/Closed Principle** states code should be open for extension but closed for modification.
+In the example, if business requirements change and we need to "Block transfers for restricted stocks", we do **not** modify `RegTechEngine.java`. Instead, we create a new class `RestrictedStockRule implements Rule`, and add it to the engine setup. The engine code remains untouched, reducing the risk of regression bugs in core logic.
 
-### Q3: When should you use Java Records?
-**Answer**: Records (introduced in Java 14) are ideal for **immutable data carriers** (DTOs, Value Objects). They automatically provide `equals()`, `hashCode()`, `toString()`, and getters. They should be used when a class is primarily just data, like `Stock` or `TransferContext` in this project. They are *not* suitable if you need mutable state or inheritance (records cannot extend other classes).
+### Q3: Why is `Stock` defined as a `record`? What does this imply for HashMaps?
+**Refers to**: `com.interview.portfolio.Stock`
+**Answer**: `Stock` is a **Java Record**, which makes it immutable and automatically generates `equals()` and `hashCode()` based on all fields.
+This is critical for `HashMap` (or `ConcurrentHashMap`) keys. If `Stock` were used as a key and was mutable, changing a field (like `price`) would change its `hashCode`. The map would then look in the wrong bucket for the object, effectively "losing" it. The immutability of Records guarantees the hash code is stable, making them perfect candidates for Map keys or Set elements.
 
-### Q4: How does `CopyOnWriteArrayList` ensure thread safety during iteration?
-**Answer**: When the list is modified (add/remove), it creates a fresh copy of the underlying array, modifies the copy, and then atomically replaces the original array reference. Iterators created before the modification continue pointing to the *old* array snapshot. This eliminates `ConcurrentModificationException` without explicit locking during iteration, making it perfect for Event Listeners but inefficient for lists with frequent writes.
+### Q4: The `Portfolio` class has a map. Why doesn't it just extend `ConcurrentHashMap`?
+**Refers to**: `com.interview.portfolio.Portfolio`
+**Answer**: This is **Composition over Inheritance**.
+If `Portfolio` extended `ConcurrentHashMap`, it would expose *all* map methods (clear, remove, put) to the outside world, allowing any caller to corrupt the internal state (e.g., removing a stock without checking logic).
+By *containing* a map (`private final Map holdings`), the `Portfolio` class encapsulates the state. It only exposes controlled methods (`addStock`, `removeStock`) that enforce business invariants (like checking for negative quantities), which is a key principle of OO encapsulation.
 
-### Q5: How would you test a class that depends on an external service (like Market Status)?
-**Answer**: We use **Dependency Injection** and **Mocking**. Instead of instantiating the external service directly (`new MarketService()`), we inject an interface (`MarketProvider`) into the constructor. In unit tests (e.g., `MarketIsOpenRuleTest`), we use a library like **Mockito** to create a mock of `MarketProvider` and define its behavior (`when(provider.isMarketOpen()).thenReturn(true)`), allowing us to test our logic in isolation without relying on the real external system.
+### Q5: How does `ExecutorService` in `EventDispatcher` help with system stability?
+**Refers to**: `com.interview.event.EventDispatcher`
+**Answer**: If we created a `new Thread()` for every event, a surge in events could exhaust system memory limits (Out of Memory Error).
+By using an `ExecutorService` (in the constructor), we can pass in a bounded pool (e.g., `Executors.newFixedThreadPool(10)`). This limits the maximum concurrency to 10 active threads. Excess tasks queue up rather than crashing the JVM, providing **Backpressure** management and predictable resource usage.
