@@ -47,13 +47,14 @@ A flexible rules engine for validating financial transactions.
 - **Design Principle**: Adheres to **Open/Closed Principle**—new rules can be added without modifying the engine.
 
 ### 4. Data Structures (`com.interview.structures`)
-Focuses on low-level data structure implementations to demonstrate algorithmic understanding.
-- **Key Feature**: Custom implementations of **Stack**, **Deque**, and **Queue** without standard collections.
-- **Algorithms**: Includes **O(1) MinStack** and **Amortized O(1) Queue** using Stacks.
+Focuses on low-level data structure implementations to demonstrate "Under the Hood" understanding.
+- **Core Collections**: `DynamicArray` (Resizing), `CustomHashMap` (Chaining), and `MyDeque` (Linked List).
+- **Concurrency**: `SimpleBlockingQueue` demonstrating `ReentrantLock` and `Conditions`.
+- **Algorithms**: **LRUCache** (LinkedHashMap), **O(1) MinStack**, and **MinHeap** (PriorityQueue).
 
 ---
 
-## Senior Java Developer Concepts
+## Senior Java Developer / Engineer Concepts
 This project implements several advanced concepts discussed in interviews:
 
 ### 1. Concurrency & Multithreading
@@ -62,8 +63,9 @@ This project implements several advanced concepts discussed in interviews:
 - **Happens-Before Relationship**: `ExecutorService` in `EventDispatcher` establishes a happens-before relationship between the submission of a task (event) and its execution, ensuring visibility of data across threads.
 
 ### 2. Algorithmic Complexity
-- **Amortized Analysis**: Demonstrated in `QueueUsingStack`. While a single `pop` operation might cost O(n) (moving elements between stacks), it happens rarely enough that the *average* cost per operation over time is **O(1)**.
-- **Space-Time Tradeoff**: Demonstrated in `MinStack`. We achieve **O(1)** time complexity for retrieving the minimum element by using **O(n)** extra space (an auxiliary stack).
+- **Amortized Analysis**: Demonstrated in `QueueUsingStack` (O(1) amortized pop) and `DynamicArray` (O(1) amortized add).
+- **Space-Time Tradeoff**: Demonstrated in `MinStack` (Auxiliary stack for O(1) min) and `LRUCache` (Map + List for O(1) access).
+- **Hashing Internals**: `CustomHashMap` demonstrates collision resolution (Chaining) and bucket indexing `(hash % capacity)`.
 
 ### 3. Design Patterns
 - **Strategy Pattern**: In `RegTech`, the `Rule<T>` interface is the strategy. The `RegTechEngine` accepts any "strategy" (Rule) to validate the context. This decouples the *what* (validation logic) from the *how* (engine execution).

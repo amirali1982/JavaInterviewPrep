@@ -58,3 +58,28 @@ Solves the classic validation problem `{[()]}` using a Stack.
 **Answer**:
 - **Array Stack**: Better cache locality (contiguous memory), less memory overhead (no pointers). But requires resizing (copying array) when full.
 - **Linked List**: Dynamic sizing (no resize cost), but higher memory per element (storing pointers) and worse cache locality (nodes scattered in heap).
+
+### 6. `DynamicArray` (Resizing List)
+A generic array wrapper that mimics `ArrayList`.
+- **Logic**: When full, `grow()` creates a new array of double size and copies elements.
+- **Complexity**: Amortized O(1) add, O(1) get.
+
+### 7. `CustomHashMap` (Chaining)
+A Key-Value store attempting to clear up "How HashMaps work".
+- **Concept**: Array of buckets (Linked Lists).
+- **Collision**: Uses chaining. If two keys hash to the same bucket, they share a list.
+
+### 8. `MinHeap` (Binary Heap)
+Value-ordered binary tree stored in an array (Basis for PriorityQueue).
+- **Logic**: Parent is always smaller than children. Validates Heap Property.
+- **Operations**: `add` (bubble-up), `poll` (move last to root, sift-down).
+
+### 9. `SimpleBlockingQueue` (Concurrency)
+Demonstrates thread-safe queuing using explicit Locks.
+- **Mechanics**: Uses `ReentrantLock` and `Condition` (`notFull`, `notEmpty`).
+- **Flow**: `put()` waits if full, `take()` waits if empty. Effectively implements Producer-Consumer pattern.
+
+### 10. `LRUCache`
+Least Recently Used replacement policy (Simulates `LinkedHashMap`).
+- **Design**: HashMap + Doubly Linked List.
+- **O(1)** access and update. New/accessed items move to head; old items evicted from tail.
