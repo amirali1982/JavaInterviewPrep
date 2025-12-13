@@ -1,71 +1,48 @@
 package com.interview.event;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
- * Central event dispatcher system.
- * Supports synchronous and asynchronous event dispatching.
- * Thread-safe: Uses ConcurrentHashMap and CopyOnWriteArrayList.
+ * EventDispatcher implementation (The "Megaphone").
+ * Pattern: Observer.
+ * Topology: One-to-Many.
+ * 
+ * Philosophy: "I (the specific component) am telling my specific listeners that
+ * something happened to me."
+ * 
+ * Usage:
+ * This class is designed to be a member of a specific component (e.g., Button,
+ * Downloader).
+ * Listeners subscribe to this specific dispatcher instance.
+ * 
+ * @param <E> The type of event this dispatcher handles.
  */
-public class EventDispatcher {
+public class EventDispatcher<E extends Event> {
 
-    // Map event class type to a list of listeners.
-    // Uses CopyOnWriteArrayList to allow safe iteration while modification happens
-    // (add/remove listeners).
-    private final Map<Class<? extends Event>, List<EventListener<? extends Event>>> listeners = new ConcurrentHashMap<>();
-
-    private final ExecutorService executor;
+    // Thread-safe list of listeners
+    private final List<EventListener<E>> listeners = new CopyOnWriteArrayList<>();
 
     /**
-     * Creates a synchronous dispatcher.
+     * Registers a listener to this specific dispatcher.
      */
-    public EventDispatcher() {
-        this.executor = null;
+    public void addListener(EventListener<E> listener) {
+        listeners.add(listener);
     }
 
     /**
-     * Creates an asynchronous dispatcher using the provided executor.
+     * Removes a listener.
      */
-    public EventDispatcher(ExecutorService executor) {
-        this.executor = executor;
+    public void removeListener(EventListener<E> listener) {
+        listeners.remove(listener);
     }
 
     /**
-     * Registers a listener for a specific event type.
+     * Dispatches the event to all listeners registered with THIS dispatcher.
      */
-    public <T extends Event> void register(Class<T> eventType, EventListener<T> listener) {
-        listeners.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>()).add(listener);
-    }
-
-    /**
-     * Dispatches an event to all registered listeners.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Event> void dispatch(T event) {
-        List<EventListener<? extends Event>> eventListeners = listeners.get(event.getClass());
-        if (eventListeners != null) {
-            for (EventListener<? extends Event> listener : eventListeners) {
-                // Type safety is ensured by the register method's signature,
-                // but we cast here because the map holds generic wildcards.
-                EventListener<T> typedListener = (EventListener<T>) listener;
-
-                if (executor != null) {
-                    executor.submit(() -> typedListener.onEvent(event));
-                } else {
-                    typedListener.onEvent(event);
-                }
-            }
-        }
-    }
-
-    public void shutdown() {
-        if (executor != null) {
-            executor.shutdown();
+    public void dispatch(E event) {
+        for (EventListener<E> listener : listeners) {
+            listener.onEvent(event);
         }
     }
 }

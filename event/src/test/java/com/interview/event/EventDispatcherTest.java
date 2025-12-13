@@ -1,70 +1,46 @@
 package com.interview.event;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EventDispatcherTest {
 
-    static class UserCreatedEvent implements Event {
-        final String username;
+    // Logic: Specific Event Type
+    static class DownloadProgressEvent implements Event {
+        final int progress;
 
-        UserCreatedEvent(String username) {
-            this.username = username;
+        DownloadProgressEvent(int progress) {
+            this.progress = progress;
         }
     }
 
-    static class OrderPlacedEvent implements Event {
+    // Logic: Specific Component (The "Source")
+    static class DownloadManager {
+        // "I have a megaphone specifically for progress updates"
+        public final EventDispatcher<DownloadProgressEvent> onProgress = new EventDispatcher<>();
+
+        void startDownload() {
+            // Simulate download steps
+            onProgress.dispatch(new DownloadProgressEvent(0));
+            onProgress.dispatch(new DownloadProgressEvent(50));
+            onProgress.dispatch(new DownloadProgressEvent(100));
+        }
     }
 
     @Test
-    void testSynchronousDispatch() {
-        EventDispatcher dispatcher = new EventDispatcher();
-        AtomicBoolean handled = new AtomicBoolean(false);
+    void testMegaphonePattern() {
+        DownloadManager downloader = new DownloadManager();
+        AtomicInteger progressSum = new AtomicInteger(0);
 
-        dispatcher.register(UserCreatedEvent.class, event -> {
-            if ("alice".equals(event.username)) {
-                handled.set(true);
-            }
+        // User connects specifically to ONLY this downloader's progress megaphone
+        downloader.onProgress.addListener(event -> {
+            System.out.println("Received progress: " + event.progress);
+            progressSum.addAndGet(event.progress);
         });
 
-        dispatcher.dispatch(new UserCreatedEvent("alice"));
+        downloader.startDownload();
 
-        assertTrue(handled.get(), "Listener should have been called synchronously");
-    }
-
-    @Test
-    void testAsyncDispatch() throws InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        EventDispatcher dispatcher = new EventDispatcher(executor);
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicBoolean handled = new AtomicBoolean(false);
-
-        dispatcher.register(OrderPlacedEvent.class, event -> {
-            try {
-                // Simulate work
-                Thread.sleep(50);
-                handled.set(true);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        dispatcher.dispatch(new OrderPlacedEvent());
-
-        // Wait for async execution
-        boolean success = latch.await(1, TimeUnit.SECONDS);
-        assertTrue(success, "Latch should have counted down");
-        assertTrue(handled.get(), "Listener should have been called");
-
-        dispatcher.shutdown();
+        assertEquals(150, progressSum.get(), "Should have received all specific progress events (0 + 50 + 100)");
     }
 }
