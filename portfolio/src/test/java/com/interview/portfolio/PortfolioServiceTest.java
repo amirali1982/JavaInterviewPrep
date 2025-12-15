@@ -17,13 +17,13 @@ import static org.mockito.Mockito.when;
 class PortfolioServiceTest {
 
     @Mock
-    private StockRepository stockRepository;
+    private GenericRepository<Asset> assetRepository;
 
     private PortfolioService portfolioService;
 
     @BeforeEach
     void setUp() {
-        portfolioService = new PortfolioService(stockRepository);
+        portfolioService = new PortfolioService(assetRepository);
     }
 
     @Test
@@ -33,11 +33,11 @@ class PortfolioServiceTest {
         Stock tesla = new Stock("TSLA", "Tesla Inc.", "Auto", new BigDecimal("200.00"));
 
         Portfolio portfolio = new Portfolio();
-        portfolio.addStock(apple, 10); // 1500
-        portfolio.addStock(tesla, 5); // 1000
+        portfolio.addAsset(apple, 10); // 1500
+        portfolio.addAsset(tesla, 5); // 1000
 
-        when(stockRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
-        when(stockRepository.findBySymbol("TSLA")).thenReturn(Optional.of(tesla));
+        when(assetRepository.findById("AAPL")).thenReturn(Optional.of(apple));
+        when(assetRepository.findById("TSLA")).thenReturn(Optional.of(tesla));
 
         // Act
         BigDecimal totalValue = portfolioService.calculateTotalValue(portfolio);
@@ -53,9 +53,9 @@ class PortfolioServiceTest {
         // In a real app, adding to portfolio might require repo validation first,
         // but here we test the service's reaction to missing data.
         Stock unknown = new Stock("UNKNOWN", "Unknown", "None", new BigDecimal("10"));
-        portfolio.addStock(unknown, 1);
+        portfolio.addAsset(unknown, 1);
 
-        when(stockRepository.findBySymbol("UNKNOWN")).thenReturn(Optional.empty());
+        when(assetRepository.findById("UNKNOWN")).thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () -> portfolioService.calculateTotalValue(portfolio));
     }

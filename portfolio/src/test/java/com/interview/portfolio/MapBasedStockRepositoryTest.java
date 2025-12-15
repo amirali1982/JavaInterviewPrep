@@ -26,7 +26,7 @@ class MapBasedStockRepositoryTest {
     void testFindBySymbol() {
         Optional<Stock> stock = repository.findBySymbol("AAPL");
         assertTrue(stock.isPresent());
-        assertEquals("Apple", stock.get().name());
+        assertEquals("Apple", stock.get().getName());
     }
 
     @Test

@@ -14,6 +14,27 @@ This module implements a flexible **Rules Engine** for validating Share Transfer
 - **`TransferContext`**: A **Java Record** holding immutable context (Sender, Receiver, Stock, Quantity).
 - **Fail-Fast vs Fail-Safe**: The engine implements fail-fast logic (returns on first error). This is efficient for blocking transactions but can be switched to "collect all errors" if needed for UI feedback.
 
+### Visual Architecture
+
+```mermaid
+classDiagram
+    class RegTechEngine {
+        +validate(TransferContext)
+    }
+    class Rule~T~ {
+        <<interface>>
+        +evaluate(context): Result
+    }
+    class SenderHasBalanceRule
+    class MarketOpenRule
+    class Kyc complianceRule
+
+    RegTechEngine --> "0..*" Rule
+    Rule <|.. SenderHasBalanceRule
+    Rule <|.. MarketOpenRule
+    Rule <|.. Kyc complianceRule
+```
+
 ## Implementation-Specific Interview Questions
 
 ### 1. Why use a Rules Engine (Strategy Pattern) instead of a simple `switch` or `if-else` block?
@@ -37,9 +58,19 @@ Thread safety depends on the Rules.
 
 ### 4. What is the benefit of `TransferContext` being a Record?
 **Refers to**: `com.interview.regtech.TransferContext`
-**Answer**: Since Java 14, **Records** reduce boilerplate for data carriers. In a Rules Engine, the context is purely for carrying data to rules. Using a Record ensures:
 - **Immutability**: A rule cannot accidentally change the `quantity` and affect subsequent rules.
 - **Readability**: The intent "this is just data" is clear.
+
+### 5. Fail-Fast vs Error Accumulation?
+**Refers to**: `RegTechEngine` logic
+**Answer**:
+- **Fail-Fast**: Return immediately on first error.
+    - *Pro*: Efficient (saves CPU), prevents cascading errors.
+    - *Con*: User fixes one error, submits, gets another error.
+- **Accumulation (validation)**: Run ALL rules, collect ALL errors.
+    - *Pro*: Better UX (fix everything at once).
+    - *Con*: Wasted CPU on invalid requests.
+- **Hybrid**: Fail-fast on critical checks (Security/Auth), accumulate on data format errors.
 
 ---
 

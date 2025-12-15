@@ -48,7 +48,7 @@ class SenderHasBalanceRuleTest {
     void shouldFailWhenInsufficientBalance() {
         Portfolio portfolio = new Portfolio();
         // 5 is less than required 10
-        portfolio.addStock(stock, 5);
+        portfolio.addAsset(stock, 5);
         when(portfolioRepository.findById("sender1")).thenReturn(Optional.of(portfolio));
 
         RuleResult result = rule.validate(context);
@@ -60,7 +60,7 @@ class SenderHasBalanceRuleTest {
     @Test
     void shouldPassWhenSufficientBalance() {
         Portfolio portfolio = new Portfolio();
-        portfolio.addStock(stock, 10);
+        portfolio.addAsset(stock, 10);
         when(portfolioRepository.findById("sender1")).thenReturn(Optional.of(portfolio));
 
         RuleResult result = rule.validate(context);

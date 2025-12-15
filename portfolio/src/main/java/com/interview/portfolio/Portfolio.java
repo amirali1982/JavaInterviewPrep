@@ -1,6 +1,5 @@
 package com.interview.portfolio;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,18 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Portfolio {
     private final Map<String, Integer> holdings = new ConcurrentHashMap<>();
 
-    public void addStock(Stock stock, int quantity) {
+    public void addAsset(Asset asset, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
-        holdings.merge(stock.symbol(), quantity, Integer::sum);
+        holdings.merge(asset.getSymbol(), quantity, Integer::sum);
     }
 
-    public void removeStock(Stock stock, int quantity) {
+    public void removeAsset(Asset asset, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
-        holdings.compute(stock.symbol(), (symbol, currentQty) -> {
+        holdings.compute(asset.getSymbol(), (symbol, currentQty) -> {
             if (currentQty == null || currentQty < quantity) {
                 throw new IllegalStateException("Insufficient healthy quantity to sell");
             }

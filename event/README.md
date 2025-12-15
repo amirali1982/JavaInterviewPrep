@@ -22,6 +22,24 @@ This module demonstrates two distinct event handling patterns in **Java 17**:
 *   **Mechanism**: attached to a specific source object (e.g., `button.onClick`, `downloader.onProgress`). Listeners subscribe to that specific instance. Tighter coupling.
 *   **Use Case**: Component-specific events where context matters (e.g., UI interactions, specific background task progress).
 
+### Visual Comparison
+
+```mermaid
+graph TD
+    subgraph EventBus [EventBus Pattern]
+    P1[Publisher A] -->|Event X| EB(Event Bus)
+    P2[Publisher B] -->|Event Y| EB
+    EB -->|Event X| S1[Subscriber 1]
+    EB -->|Event Y| S2[Subscriber 2]
+    EB -->|Event X| S2
+    end
+
+    subgraph EventDispatcher [EventDispatcher Pattern]
+    Src[Source Component] -->|Specific Event| L1[Listener 1]
+    Src -->|Specific Event| L2[Listener 2]
+    end
+```
+
 ## Implementation Details
 
 ### EventBus Features
@@ -51,8 +69,12 @@ This module demonstrates two distinct event handling patterns in **Java 17**:
 - **Sync**: Exceptions propagate and can crash the loop.
 - **Async**: Exceptions are captured in `Future`. Need explicit handling (logging/UncaughtExceptionHandler) to avoid silent failures.
 
-### 4. Explain the PECS Principle.
-**Answer**:
 - **Producer Extends**: `List<? extends T>` (Read-only access to T).
 - **Consumer Super**: `List<? super T>` (Write-only access to T).
 - Used in our listeners to ensure type safety.
+
+### 5. Blocking vs Non-Blocking Dispatch?
+**Answer**:
+- **Blocking (Synchronous)**: The caller waits for all listeners to finish. Simple, consistent, but slow listeners delay the system.
+- **Non-Blocking (Asynchronous)**: The caller fires and forgets (`ExecutorService.submit()`). Fast, but error handling is harder (need `Future.get()` or callbacks).
+- **Modern**: Use `CompletableFuture` to chain async actions without blocking main threads.

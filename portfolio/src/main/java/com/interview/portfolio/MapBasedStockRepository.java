@@ -19,7 +19,7 @@ public class MapBasedStockRepository implements StockRepository {
 
     @Override
     public void save(Stock stock) {
-        storage.put(stock.symbol(), stock);
+        storage.put(stock.getSymbol(), stock);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class MapBasedStockRepository implements StockRepository {
             return List.of();
 
         return storage.values().stream()
-                .filter(stock -> sector.equalsIgnoreCase(stock.sector()))
+                .filter(stock -> sector.equalsIgnoreCase(stock.getSector()))
                 .collect(Collectors.toList());
     }
 }

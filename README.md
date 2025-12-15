@@ -32,9 +32,10 @@ mvn clean install
 ## Key Modules
 
 ### 1. Portfolio & Stocks (`com.interview.portfolio`)
-Demonstrates core OO modeling and thread-safe state management.
-- **Key Feature**: `Portfolio` uses `ConcurrentHashMap` to handle concurrent additions/removals of stock.
-- **Modern Java**: Uses **Java 17 Records** (`Stock`) for immutable data carriers.
+Demonstrates core OO modeling, thread-safe state management, and modern language features.
+- **Key Feature**: `GenericRepository<T extends Asset>` demonstrates **Bounded Generics** and Type Safety.
+- **Concepts**: **Reflection** (Runtime inspection), **Inheritance** (`Asset -> Stock -> RestrictedStock`), and **Polymorphism**.
+- **Modern Java**: Uses **Java 17 Records** and Sealed-like hierarchies.
 
 ### 2. Event System (`com.interview.event`)
 A generic, thread-safe Event Bus implementation.
