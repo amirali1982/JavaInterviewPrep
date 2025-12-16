@@ -46,6 +46,12 @@ We implemented `StreamAnalytics.java` to demonstrate common interview patterns u
 - **Statistics**: `summaryStatistics()` -> Min, Max, Average value in one pass.
 - **Handling Duplicates**: `toMap(key, val, mergeFunction)` to resolve collisions cleanly.
 
+### Advanced: Meta-Programming (Dynamic Proxies)
+We implemented a **Dynamic Proxy** (`LoggingHandler`) to demonstrate how frameworks like Spring work under the hood.
+- **Concept**: A `java.lang.reflect.InvocationHandler` intercepts method calls at runtime.
+- **Demo**: We wrap `GenericRepository` with a proxy. When `@Logged` methods are called, the proxy prints timing metrics (Aspect Oriented Programming - AOP).
+- **Key Pattern**: This is the "Magic" behind `@Transactional`, `@Autowired`, and Lazy Loading.
+
 ## Implementation-Specific Interview Questions
 
 ### 1. Why Sealed Classes? Why not just `final`?

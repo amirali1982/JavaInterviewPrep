@@ -7,5 +7,6 @@ public interface GenericRepository<T> {
 
     void save(String id, T entity);
 
+    @com.interview.portfolio.proxy.Logged
     void add(T entity);
 }

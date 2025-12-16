@@ -16,7 +16,7 @@ public class RegTechEngine {
      * Automatically discovers implementations of Rule declared in
      * META-INF/services.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void loadRulesFromSPI() {
         ServiceLoader<Rule> loader = ServiceLoader.load(Rule.class);
         for (Rule<?> rule : loader) {

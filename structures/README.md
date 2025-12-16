@@ -86,6 +86,13 @@ Tree optimized for string searching.
 - **Complexity**: O(L) where L is word length. Faster than HashMap for prefix searches.
 - **Use Case**: Autocomplete, Spell Checker.
 
+### 16. `LockFreeStack` (CAS / Atomics)
+A Thread-Safe Stack that uses **No Locks** (`synchronized`).
+- **Mechanism**: `AtomicReference` + `Compare-And-Swap` (CAS).
+- **Algorithm**: Read Head -> Create New Node -> Try to Swap Head.
+- **Loop**: `while(!head.compareAndSet(old, new)) check...`
+- **Why**: "Wait-free" or "Lock-free" algorithms prevent thread starvation and deadlock.
+
 ---
 
 ## Interview Questions & Answers

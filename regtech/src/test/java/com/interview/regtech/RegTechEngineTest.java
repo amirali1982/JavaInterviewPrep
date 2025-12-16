@@ -24,7 +24,6 @@ class RegTechEngineTest {
         assertTrue(count >= 2, "Should load at least 2 rules from SPI");
     }
 
-    @SuppressWarnings("unchecked")
     private int getRulesCount(RegTechEngine engine) throws NoSuchFieldException, IllegalAccessException {
         Field rulesField = RegTechEngine.class.getDeclaredField("rules");
         rulesField.setAccessible(true);

@@ -56,6 +56,12 @@ graph TD
 -   **Concurrency**: `ConcurrentHashMap` and `CopyOnWriteArrayList` for thread safety.
 -   **Async**: Optional `ExecutorService`.
 
+### Advanced: Java NIO (Non-Blocking IO)
+We implemented `NioEventLogger` to demonstrate high-performance file writing.
+- **Components**: `FileChannel`, `ByteBuffer`.
+- **Difference**: Standard IO (`FileWriter`) blocks the thread while writing. NIO Channels allow bulk transfers and can be used with `Selector` for non-blocking operations on a single thread.
+- **Code Snippet**: `buffer.flip(); channel.write(buffer);`
+
 ## Implementation-Specific Interview Questions
 
 ### 1. What is Backpressure in Reactive Streams?
