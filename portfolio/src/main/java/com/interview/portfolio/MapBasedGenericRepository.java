@@ -1,24 +1,20 @@
 package com.interview.portfolio;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Thread-safe implementation of GenericRepository.
- * Uses ConcurrentHashMap for storage.
- *
- * @param <T> the type of asset
- */
-public class MapBasedGenericRepository<T extends Asset> implements GenericRepository<T> {
-
-    private final Map<String, T> storage = new ConcurrentHashMap<>();
+public class MapBasedGenericRepository<T> implements GenericRepository<T> {
+    private final Map<String, T> storage = new HashMap<>();
+    private final Map<Class<?>, List<T>> assetRegistry = new HashMap<>();
 
     @Override
-    public void save(T item) {
-        storage.put(item.getSymbol(), item);
+    public void save(String id, T entity) {
+        storage.put(id, entity);
+        // Also add to registry for consistency
+        add(entity);
     }
 
     @Override
@@ -27,7 +23,16 @@ public class MapBasedGenericRepository<T extends Asset> implements GenericReposi
     }
 
     @Override
-    public List<T> findAll() {
-        return new ArrayList<>(storage.values());
+    @SuppressWarnings("unchecked")
+    public void add(T entity) {
+        Class<?> clazz = entity.getClass();
+        List<T> assets = assetRegistry.computeIfAbsent(clazz, k -> new ArrayList<>());
+        assets.add(entity);
+
+        // Try to sync with ID storage if possible
+        if (entity instanceof Asset) {
+            Asset asset = (Asset) entity;
+            storage.put(asset.getSymbol(), entity);
+        }
     }
 }
