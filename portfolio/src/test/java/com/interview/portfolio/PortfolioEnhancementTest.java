@@ -17,7 +17,7 @@ class PortfolioEnhancementTest {
         GenericRepository<Stock> repository = new MapBasedGenericRepository<>();
         Stock apple = new Stock("AAPL", "Apple Inc.", "Technology", new BigDecimal("150.00"));
 
-        repository.save(apple);
+        repository.add(apple);
         Optional<Stock> retrieved = repository.findById("AAPL");
 
         assertTrue(retrieved.isPresent());
@@ -62,8 +62,8 @@ class PortfolioEnhancementTest {
 
         // Use Generic Repository with new types
         GenericRepository<Asset> assetRepo = new MapBasedGenericRepository<>();
-        assetRepo.save(bond);
-        assetRepo.save(rsu);
+        assetRepo.add(bond);
+        assetRepo.add(rsu);
 
         assertEquals(bond, assetRepo.findById("US10Y").get());
         assertEquals(rsu, assetRepo.findById("META").get());

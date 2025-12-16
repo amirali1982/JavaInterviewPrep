@@ -23,7 +23,6 @@ public class MapBasedGenericRepository<T> implements GenericRepository<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void add(T entity) {
         Class<?> clazz = entity.getClass();
         List<T> assets = assetRegistry.computeIfAbsent(clazz, k -> new ArrayList<>());
