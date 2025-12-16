@@ -1,86 +1,72 @@
 # Portfolio and Stocks Module
 
 ## Overview
-This module demonstrates a clean, thread-safe implementation of a simple Portfolio management system using **Java 17**. It highlights modern Java features and solid object-oriented design principles suitable for coding interviews.
+This module demonstrates a clean, thread-safe implementation of a simple Portfolio management system using **Java 17**. It highlights modern Java features (Sealed Classes, Records, CompletableFuture) and solid object-oriented design principles suitable for coding interviews.
 
 ## Key Features
-1.  **Inheritance & Polymorphism**: `Stock` extends `Asset`, creating a scalable hierarchy (`Asset` -> `Stock`).
-2.  **Generics**: `GenericRepository<T extends Asset>` demonstrates usage of **Bounded Type Parameters** to ensure type safety.
-3.  **Reflection**: `ReflectiveAssetInspector` demonstrates runtime type inspection and validation.
+1.  **Sealed Classes** (Java 17): `Asset` is a `sealed` class, strictly permitting only `Stock` and `Bond` subclasses. This enforces a known hierarchy.
+2.  **Modern Async**: `AnalysisService` uses `CompletableFuture` for non-blocking, parallel market analysis.
+3.  **Generics**: `GenericRepository<T extends Asset>` demonstrates usage of **Bounded Type Parameters** and ID-based registry logic.
 4.  **Thread Safety**: The `Portfolio` class uses `ConcurrentHashMap` to manage holdings, allowing safe concurrent updates.
-5.  **Encapsulation**: The internal map is not exposed directly; only business methods (`addStock`, `removeStock`) are public.
+5.  **Encapsulation**: The internal map is not exposed directly; only business methods are public.
 
 ## Implementation Concepts
 
-### Inheritance Hierarchy
-We introduced an `Asset` abstract class to centralize common properties like `symbol` and `price`.
-The hierarchy demonstrates **Polymorphism** and **Code Reuse**:
+### Sealed Interface Hierarchy (Java 17)
+We refactored the legacy abstract class to a **Sealed Class Hierarchy**:
 
-```mermaid
-classDiagram
-    class Asset {
-        <<abstract>>
-        String symbol
-        BigDecimal price
-        getSymbol()
-        getPrice()
-    }
-    class Stock {
-        String name
-        String sector
-    }
-    class Bond {
-        BigDecimal interestRate
-    }
-    class RestrictedStock {
-        int lockupPeriodMonths
-    }
-
-    Asset <|-- Stock
-    Asset <|-- Bond
-    Stock <|-- RestrictedStock
+```java
+public abstract sealed class Asset permits Stock, Bond {}
+public non-sealed class Stock extends Asset {}
+public final class Bond extends Asset {}
 ```
 
-- **Stock**: Represents standard equity.
-- **Bond**: Represents debt instruments with an interest rate.
-- **RestrictedStock**: A specialized `Stock` (RSU) with a lockup period. demonstrates multilevel inheritance.
+- **Sealed (`Asset`)**: We control exactly who extends `Asset`. No random external classes can break our contract.
+- **Non-Sealed (`Stock`)**: We explicitly allow extension (open) for `Stock` to support `RestrictedStock`.
+- **Final (`Bond`)**: We close the hierarchy for Bonds.
 
-### Q: Why use an Abstract Class (`Asset`) instead of an Interface?
-**Refers to**: `com.interview.portfolio.Asset`
-**Answer**:
-- **Shared State**: Assets have common *state* (`symbol`, `price`). Interfaces (prior to Java 8) couldn't hold state. Even with default methods, they cannot hold instance fields.
-- **Constructor Logic**: `Asset` enforces validation logic in its constructor (e.g., "Price cannot be negative"). An interface cannot enforce this initialization logic on implementers.
-- **Identity**: 'Is-A' relationship. A Stock *is an* Asset. It's a stronger relationship than "Stock implements AssetBehavior".
+### Asynchronous Pipeline (`AnalysisService`)
+We moved beyond simple threads to **CompletableFuture** pipelines:
+- **`supplyAsync`**: Fetches data in a background thread pool.
+- **`thenApply`**: Processes data (e.g., calculating future value) as soon as it arrives.
+- **`exceptionally`**: Handles errors gracefully without crashing the main thread.
+- **`allOf`**: Combines multiple independent futures (parallel fetches) into a single result map.
 
-### Generics (`GenericRepository<T extends Asset>`)
-We use **Bounded Generics** to create a flexible yet safe repository.
-- `<T>` makes it reusable for any type.
-- `extends Asset` restricts usage to valid asset types only, preventing misuse (e.g., `String`).
-- This avoids the pitfalls of using raw `Object` types and casting.
+### Generics & Registry
+`GenericRepository` not only provides CRUD but maintains a **Class-Based Registry**.
+- `add(entity)`: Automatically indexes the entity by its ID (if it's an Asset) AND by its Class type.
+- This allows looking up "All Stocks" or "All Assets" efficiently without iterating the whole value set.
 
-### Reflection (`ReflectiveAssetInspector`)
-We demonstrate how to use Java Reflection to inspect class hierarchies at runtime.
-- `checkSubclass(sub, super)` confirms inheritance relationships dynamically.
-- This is useful for frameworks or libraries that need to validate types without knowing them at compile time.
-
-### Q: When is Reflection appropriate?
-**Refers to**: `ReflectiveAssetInspector`
-**Answer**: Verification/Framework code. In business logic, explicit types are better. Reflection bypasses compile-time checks and is slower, but it allows generic tools (like serialization libraries or ORMs) to operate on unknown types.
-
-### Java Objects (`Stock`)
-`Stock` is a standard Java class (DTO) extending `Asset`. While Records are great for immutable data, full classes allow for inheritance hierarchies which typical Records do not support (Records cannot extend other classes).
-
-### ConcurrentHashMap (`holdings`)
-We use `holdings.merge()` and `holdings.compute()`. These are **atomic operations**. Even without `synchronized`, `merge` guarantees that the read-modify-write cycle (Read qty -> Add -> Write qty) happens atomically for that key.
+### Stream API "Cheat Sheet" (`StreamAnalytics`)
+We implemented `StreamAnalytics.java` to demonstrate common interview patterns using the Java Stream API:
+- **Filtering/Mapping**: `filter(price > 100).map(Symbol)`
+- **Grouping**: `groupingBy(Stock::getSector)` -> `Map<String, List<Stock>>`
+- **Counting**: `groupingBy(Sector, counting())` -> `Map<String, Long>`
+- **Partitioning**: `partitioningBy(price > 1000)` -> `Map<Boolean, List<Asset>>` (Cheap vs Expensive)
+- **Statistics**: `summaryStatistics()` -> Min, Max, Average value in one pass.
+- **Handling Duplicates**: `toMap(key, val, mergeFunction)` to resolve collisions cleanly.
 
 ## Implementation-Specific Interview Questions
 
-### 1. In `Portfolio.java`, why is `getHoldings()` returning `Collections.unmodifiableMap`?
+### 1. Why Sealed Classes? Why not just `final`?
+**Refers to**: `Asset` vs `Bond`
+**Answer**:
+- `final` prevents **all** inheritance.
+- `sealed` allows **controlled** inheritance.
+- Allows the compiler to perform **exhaustiveness checks** in `switch` expressions (e.g., if you switch on `Asset`, you don't need a `default` case if you handle `Stock` and `Bond`).
+
+### 2. Difference between `Future.get()` and `CompletableFuture`?
+**Refers to**: `AnalysisService`
+**Answer**:
+- `Future.get()` is **blocking**. It freezes the current thread until the result is ready.
+- `CompletableFuture` allows **callback-style** (non-blocking) transformations (`thenApply`, `thenAccept`). You can describe the entire data pipeline before any data is even fetched.
+
+### 3. In `Portfolio.java`, why is `getHoldings()` returning `Collections.unmodifiableMap`?
 **Refers to**: `com.interview.portfolio.Portfolio.getHoldings()`
 **Answer**: This is **Defensive Copying / Immutable View**.
 If we returned the `ConcurrentHashMap` directly, a caller could do `portfolio.getHoldings().clear()`, wiping out the user's assets bypassing the `removeAsset` validation logic. wrapping it in `unmodifiableMap` ensures encapsulation is preserved—the outside world can *look* but cannot *touch*.
 
-### 2. Can `Stock` be a key in a HashMap? What if `Stock` was a mutable class?
+### 4. Can `Stock` be a key in a HashMap? What if `Stock` was a mutable class?
 **Refers to**: `com.interview.portfolio.Stock`
 **Answer**: `Stock` is designed as an **immutable class**, making it a perfect key.
 If it were a mutable class, and we utilized it as a key:
@@ -90,12 +76,12 @@ If it were a mutable class, and we utilized it as a key:
 4. The entry is effectively lost (memory leak).
 **Lesson**: Always use immutable objects for Map keys.
 
-### 3. Explain strict encapsulation in the `Portfolio` class.
+### 5. Explain strict encapsulation in the `Portfolio` class.
 **Refers to**: `com.interview.portfolio.Portfolio`
 **Answer**: The `Portfolio` class follows the "Tell, Don't Ask" principle. We don't ask for the map and manipulate it. We tell the portfolio to `addAsset`.
 This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", "Cannot sell more than you own". If we exposed the raw list/map, we couldn't guarantee these rules are followed.
 
-### 4. How does `Stream` API in repository compare to a `for` loop?
+### 6. How does `Stream` API in repository compare to a `for` loop?
 **Refers to**: `com.interview.portfolio.PortfolioService` / Repository
 **Answer**:
 - **Declarative**: Streams say *what* we want (`filter(sector).collect()`) rather than *how* (indexes, temporary lists).
@@ -106,13 +92,13 @@ This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", 
 
 ## Broader Conceptual Interview Questions (Collections & Streams)
 
-### 5. How does a HashMap handle collisions internally?
+### 7. How does a HashMap handle collisions internally?
 **Concept**: Algorithms & Data Structures.
 **Answer**:
 - **Chaining**: When multiple keys have the same hash (Collision), they are stored in a linked list (chain) at that bucket index.
 - **Treeification (Java 8+)**: If a chain grows too long (threshold is 8), Java converts the Linked List into a **Red-Black Tree**. This improves lookup performance from O(n) (list scan) to O(log n) (tree search), preventing Denial-of-Service attacks based on hash collisions.
 
-### 6. Difference between `map()` and `flatMap()` in Streams?
+### 8. Difference between `map()` and `flatMap()` in Streams?
 **Concept**: Functional Programming.
 **Answer**:
 - **`map`**: Transforms each element one-to-one.
@@ -121,14 +107,14 @@ This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", 
     - Example: You have a `List<Order>`. Each `Order` has `List<LineItem>`.
     - `orders.stream().flatMap(order -> order.getLineItems().stream())` gives you a single `Stream<LineItem>`.
 
-### 7. Checked vs Unchecked Exceptions?
+### 9. Checked vs Unchecked Exceptions?
 **Concept**: Error Handling.
 **Answer**:
 - **Checked (extends `Exception`)**: Compiler forces you to `catch` or `throws`. Represents recoverable error conditions (e.g., `IOException` file not found).
 - **Unchecked (extends `RuntimeException`)**: Compiler does not force handling. Represents programming errors (e.g., `NullPointerException`, `IndexOutOfBounds`).
 - **Trend**: Modern framworks (Spring) and libraries favour Unchecked exceptions to reduce boilerplate and "catch-ignore" blocks.
 
-### 8. What is the contract between `equals()` and `hashCode()`?
+### 10. What is the contract between `equals()` and `hashCode()`?
 **Refers to**: Essential for `Stock` to work as a Map key.
 **Answer**:
 1. If `x.equals(y)` is true, `x.hashCode()` MUST equal `y.hashCode()`.
@@ -136,7 +122,7 @@ This allows `Portfolio` to enforce **Invariants**: "Quantity must be positive", 
 3. If `hashCode()` is same, objects MIGHT be equal (collision).
 **Violation**: If you override equals but not hashCode, storing objects in a HashMap will break (you'll lose items).
 
-### 9. Why should you avoid `Optional` in fields?
+### 11. Why should you avoid `Optional` in fields?
 **Concept**: Java 8 Best Practices.
 **Answer**:
 - **Serializable**: `Optional` does not implement `Serializable`. If your class needs to be serialized (e.g., for caching/sending over network), `Optional` fields will fail.

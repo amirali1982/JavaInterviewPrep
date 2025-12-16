@@ -1,21 +1,28 @@
 # Event Listening System Module
 
 ## Overview
-This module demonstrates two distinct event handling patterns in **Java 17**:
+This module demonstrates distinct event handling patterns in **Java 17**, evolving from classic Observer to Modern Reactive Streams:
 
-1.  **EventBus** (The "Town Square"): Pub/Sub, Many-to-Many.
-2.  **EventDispatcher** (The "Megaphone"): Observer Pattern, One-to-Many.
+1.  **EventBus** (Classic): Pub/Sub using standard listeners.
+2.  **ReactiveEventBus** (Modern): **Java 9 Flow API** (`Publisher`, `Subscriber`) implementation.
+3.  **EventDispatcher** (Targeted): Observer Pattern (One-to-Many).
 
 ## Key Concepts
 
-### 1. EventBus ("Town Square")
+### 1. ReactiveEventBus (Java 9 Flow API)
+*   **Philosophy**: "I want to handle streams of events asynchronously with backpressure."
+*   **Standard**: Implements `java.util.concurrent.Flow`.
+*   **Mechanism**: Uses `SubmissionPublisher<T>` (JDK 9+ default publisher).
+*   **Key Feature - Backpressure**: If the subscriber is too slow, the publisher can buffer, drop, or block, preventing system overload. Standard listeners just crash or OOM if overwhelmed.
+
+### 2. EventBus ("Town Square")
 *   **Philosophy**: "I don't care who is listening, and I don't care who is talking."
 *   **Pattern**: Publish-Subscribe (Pub/Sub).
 *   **Topology**: Many-to-Many.
 *   **Mechanism**: A centralized hub where publishers throw events and subscribers pick them up by type. Completely decoupled.
 *   **Use Case**: Global app events (e.g., `UserLoggedInEvent`, `StockSplitEvent`) where the sender doesn't need to know the receiver.
 
-### 2. EventDispatcher ("Megaphone")
+### 3. EventDispatcher ("Megaphone")
 *   **Philosophy**: "I (the specific component) am telling my specific listeners that something happened to me."
 *   **Pattern**: Observer Pattern.
 *   **Topology**: One-to-Many.
@@ -26,52 +33,53 @@ This module demonstrates two distinct event handling patterns in **Java 17**:
 
 ```mermaid
 graph TD
-    subgraph EventBus [EventBus Pattern]
-    P1[Publisher A] -->|Event X| EB(Event Bus)
-    P2[Publisher B] -->|Event Y| EB
-    EB -->|Event X| S1[Subscriber 1]
-    EB -->|Event Y| S2[Subscriber 2]
-    EB -->|Event X| S2
+    subgraph Reactive [Reactive Flow]
+    P[Publisher] -->|onNext| S[Subscriber]
+    S -.->|request(n)| P
     end
 
-    subgraph EventDispatcher [EventDispatcher Pattern]
-    Src[Source Component] -->|Specific Event| L1[Listener 1]
-    Src -->|Specific Event| L2[Listener 2]
+    subgraph PubSub [Legacy EventBus]
+    P1[Publisher A] -->|Event X| EB(Event Bus)
+    EB -->|Event X| S1[Subscriber 1]
     end
 ```
 
 ## Implementation Details
+
+### ReactiveEventBus Features
+-   **Standardization**: Uses `Flow.Publisher` and `Flow.Subscriber` interfaces introduced in Java 9.
+-   **Async**: Native support for asynchronous processing.
+-   **Backpressure**: Subscribers explicitly `request(n)` items, controlling the flow rate.
 
 ### EventBus Features
 -   **Generics**: `Map<Class<? extends Event>, List<EventListener<?>>>` for type-safe dispatching.
 -   **Concurrency**: `ConcurrentHashMap` and `CopyOnWriteArrayList` for thread safety.
 -   **Async**: Optional `ExecutorService`.
 
-### EventDispatcher Features
--   **Generics**: `EventDispatcher<E>` is typed to the specific event it emits.
--   **Simplicity**: Uses `CopyOnWriteArrayList` for a thread-safe list of listeners.
-
 ## Implementation-Specific Interview Questions
 
-### 1. In `EventBus`, you used `CopyOnWriteArrayList`. what is the trade-off?
+### 1. What is Backpressure in Reactive Streams?
+**Refers to**: `ReactiveEventBus`
+**Answer**: Backpressure is the ability of a Subscriber to signal to the Publisher how much data it can handle (`subscription.request(n)`).
+- Without backpressure: A fast publisher overwhelms a slow subscriber (OutOfMemory).
+- With backpressure: The publisher slows down, buffers, or drops data to match the subscriber's speed.
+
+### 2. In `EventBus`, you used `CopyOnWriteArrayList`. what is the trade-off?
 **Answer**:
 - **Benefit**: Lock-free traversal (fast reads/dispatch). No `ConcurrentModificationException`.
 - **Cost**: Expensive writes (copy array on add/remove).
 - **Relevance**: Ideal for Event systems where **reads (dispatching) >> writes (registering)**.
 
-### 2. When would you use EventDispatcher over EventBus?
+### 3. When would you use EventDispatcher over EventBus?
 **Answer**:
 - Use **EventDispatcher** when the event is tightly coupled to a specific *instance* of an object (e.g., "This specific file finished downloading").
 - Use **EventBus** when the event is system-wide and the specific source doesn't matter (e.g., "Someone logged in").
+- Use **ReactiveEventBus** when you have a high volume of events and need buffering/backpressure.
 
-### 3. How does `ExecutorService` change exception handling in EventBus?
+### 4. How does `ExecutorService` change exception handling in EventBus?
 **Answer**:
 - **Sync**: Exceptions propagate and can crash the loop.
 - **Async**: Exceptions are captured in `Future`. Need explicit handling (logging/UncaughtExceptionHandler) to avoid silent failures.
-
-- **Producer Extends**: `List<? extends T>` (Read-only access to T).
-- **Consumer Super**: `List<? super T>` (Write-only access to T).
-- Used in our listeners to ensure type safety.
 
 ### 5. Blocking vs Non-Blocking Dispatch?
 **Answer**:

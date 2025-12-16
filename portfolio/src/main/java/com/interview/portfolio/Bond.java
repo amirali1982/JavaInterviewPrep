@@ -7,7 +7,7 @@ import java.util.Objects;
  * Represents a Bond asset.
  * Extends Asset directly.
  */
-public class Bond extends Asset {
+public final class Bond extends Asset {
     private final BigDecimal interestRate;
 
     public Bond(String symbol, BigDecimal price, BigDecimal interestRate) {

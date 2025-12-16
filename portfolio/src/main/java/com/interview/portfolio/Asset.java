@@ -7,7 +7,7 @@ import java.util.Objects;
  * Abstract base class for all assets in the portfolio.
  * Serves as the root of the hierarchy for Generic constraints.
  */
-public abstract class Asset {
+public abstract sealed class Asset permits Stock, Bond {
     private final String symbol;
     private final BigDecimal price;
 

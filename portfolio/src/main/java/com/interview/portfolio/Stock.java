@@ -8,7 +8,7 @@ import java.util.Objects;
  * Extends Asset to demonstrate inheritance and is used with restricted
  * Generics.
  */
-public class Stock extends Asset {
+public non-sealed class Stock extends Asset {
     private final String name;
     private final String sector;
 
