@@ -79,7 +79,7 @@ This project implements several advanced concepts discussed in interviews:
 ### 3. Design Patterns
 - **Strategy Pattern**: In `RegTech`, the `Rule<T>` interface is the strategy. The `RegTechEngine` accepts any "strategy" (Rule) to validate the context. This decouples the *what* (validation logic) from the *how* (engine execution).
 - **Observer Pattern**: The `EventDispatcher` is the subject and `EventListener`s are observers. Key for decoupling components—the code firing an event doesn't need to know who is listening.
-- **Immutable Objects**: `Stock` and `TransferContext` are implemented as **Java Records**. Immutable objects are inherently thread-safe because their state cannot change after creation, eliminating synchronization needs for read-only data.
+- **Immutable Objects**: `TransferContext` is a **Java Record**, while `Stock` is a strictly **Immutable Class**. Immutable objects are inherently thread-safe because their state cannot change after creation, eliminating synchronization needs for read-only data.
 
 ---
 
@@ -95,24 +95,25 @@ This project implements several advanced concepts discussed in interviews:
 **Answer**: The **Open/Closed Principle** states code should be open for extension but closed for modification.
 In the example, if business requirements change and we need to "Block transfers for restricted stocks", we do **not** modify `RegTechEngine.java`. Instead, we create a new class `RestrictedStockRule implements Rule`, and add it to the engine setup. The engine code remains untouched, reducing the risk of regression bugs in core logic.
 
-### Q3: Why is `Stock` defined as a `record`? What does this imply for HashMaps?
-**Refers to**: `com.interview.portfolio.Stock`
-**Answer**: `Stock` is a **Java Record**, which makes it immutable and automatically generates `equals()` and `hashCode()` based on all fields.
-This is critical for `HashMap` (or `ConcurrentHashMap`) keys. If `Stock` were used as a key and was mutable, changing a field (like `price`) would change its `hashCode`. The map would then look in the wrong bucket for the object, effectively "losing" it. The immutability of Records guarantees the hash code is stable, making them perfect candidates for Map keys or Set elements.
+### Q3: Why is `Stock` immutable? What happens if a Map Key is mutable?
+**Refers to**: `com.interview.portfolio.domain.Stock`
+**Answer**: `Stock` is designed as an **Immutable Class**, ensuring its `hashCode()` never changes.
+This is critical because `Stock` is used as a key in `Portfolio`'s internal Map. If `Stock` were mutable and we changed a field (like `price`), its `hashCode` would change. The Map would then look in the wrong bucket for the object, effectively "losing" it (a memory leak).
+*Note*: `TransferContext` uses **Java Records** to achieve the same immutability with less boilerplate.
 
 ### Q4: The `Portfolio` class has a map. Why doesn't it just extend `ConcurrentHashMap`?
-**Refers to**: `com.interview.portfolio.Portfolio`
+**Refers to**: `com.interview.portfolio.domain.Portfolio`
 **Answer**: This is **Composition over Inheritance**.
 If `Portfolio` extended `ConcurrentHashMap`, it would expose *all* map methods (clear, remove, put) to the outside world, allowing any caller to corrupt the internal state (e.g., removing a stock without checking logic).
 By *containing* a map (`private final Map holdings`), the `Portfolio` class encapsulates the state. It only exposes controlled methods (`addStock`, `removeStock`) that enforce business invariants (like checking for negative quantities), which is a key principle of OO encapsulation.
 
 ### Q5: How does `ExecutorService` in `EventDispatcher` help with system stability?
-**Refers to**: `com.interview.event.EventDispatcher`
+**Refers to**: `com.interview.event.basic.EventDispatcher`
 **Answer**: If we created a `new Thread()` for every event, a surge in events could exhaust system memory limits (Out of Memory Error).
 By using an `ExecutorService` (in the constructor), we can pass in a bounded pool (e.g., `Executors.newFixedThreadPool(10)`). This limits the maximum concurrency to 10 active threads. Excess tasks queue up rather than crashing the JVM, providing **Backpressure** management and predictable resource usage.
 
 ### Q6: Why avoid `java.util.Stack`?
-**Refers to**: `com.interview.structures.CustomStack`
+**Refers to**: `com.interview.structures.linear.CustomStack`
 **Answer**: `java.util.Stack` is a legacy class that extends `Vector`. This means every single method is `synchronized`, causing unnecessary thread-locking overhead in single-threaded applications.
 **Modern Approach**: Use `Deque<T> stack = new ArrayDeque<>()`. It is faster, not synchronized, and provides a cleaner API (stack and queue methods).
 

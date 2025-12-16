@@ -150,6 +150,7 @@ Demonstrates **Zero-Copy IO** (`MappedByteBuffer`).
 
 ### Q3: Why is `java.util.Stack` considered legacy?
 **Answer**: It violates the standard "Vector vs ArrayList" principle. `Stack` extends `Vector`, making all operations `synchronized`. For most single-threaded use cases, this locking overhead is unnecessary. The recommended replacement is `Deque<T> stack = new ArrayDeque<>()`.
+Refers to: `com.interview.structures.linear.CustomStack`
 
 ### Q4: Explain the "Amortized O(1)" complexity of `QueueUsingStack`.
 **Refers to**: `pop()` method.
