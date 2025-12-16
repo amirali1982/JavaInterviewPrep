@@ -35,7 +35,7 @@ This module demonstrates distinct event handling patterns in **Java 17**, evolvi
 graph TD
     subgraph Reactive [Reactive Flow]
     P[Publisher] -->|onNext| S[Subscriber]
-    S -.->|request(n)| P
+    S -.->|"request(n)"| P
     end
 
     subgraph PubSub [Legacy EventBus]
