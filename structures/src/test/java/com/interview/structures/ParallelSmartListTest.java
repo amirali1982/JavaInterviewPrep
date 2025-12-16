@@ -1,5 +1,6 @@
 package com.interview.structures;
 
+import com.interview.structures.list.ParallelSmartList;
 import org.junit.jupiter.api.Test;
 import java.util.stream.Collectors;
 import java.util.List;

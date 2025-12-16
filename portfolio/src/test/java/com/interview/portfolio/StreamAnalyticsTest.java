@@ -1,5 +1,9 @@
 package com.interview.portfolio;
 
+import com.interview.portfolio.service.StreamAnalytics;
+import com.interview.portfolio.domain.Stock;
+import com.interview.portfolio.domain.Bond;
+import com.interview.portfolio.domain.Asset;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

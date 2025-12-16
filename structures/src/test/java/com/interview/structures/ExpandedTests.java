@@ -1,5 +1,10 @@
 package com.interview.structures;
 
+import com.interview.structures.list.DynamicArray;
+import com.interview.structures.map.CustomHashMap;
+import com.interview.structures.map.LRUCache;
+import com.interview.structures.tree.MinHeap;
+import com.interview.structures.linear.SimpleBlockingQueue;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.concurrent.atomic.AtomicInteger;

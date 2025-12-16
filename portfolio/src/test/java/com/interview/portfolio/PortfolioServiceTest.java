@@ -1,5 +1,10 @@
 package com.interview.portfolio;
 
+import com.interview.portfolio.service.PortfolioService;
+import com.interview.portfolio.repository.GenericRepository;
+import com.interview.portfolio.domain.Stock;
+import com.interview.portfolio.domain.Asset;
+import com.interview.portfolio.domain.Portfolio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

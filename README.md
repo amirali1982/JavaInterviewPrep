@@ -11,16 +11,24 @@ javainterviewprep/
 ├── pom.xml             # Root Parent POM
 ├── portfolio/          # Module: Stock & Portfolio Management
 │   ├── pom.xml
-│   └── src/main/java/com/interview/portfolio/...
+│   └── src/main/java/com/interview/portfolio/
+│       ├── domain/     # Core Entities (Asset, Stock)
+│       ├── service/    # Business Logic (Analysis, Calculator)
+│       └── repository/ # Data Access
 ├── event/              # Module: Event Dispatching System
 │   ├── pom.xml
 │   └── src/main/java/com/interview/event/...
 ├── regtech/            # Module: Validation Rules Engine
 │   ├── pom.xml
 │   └── src/main/java/com/interview/regtech/...
-└── structures/         # Module: Data Structures (Stack, Deque, Queue)
+└── structures/         # Module: Data Structures
     ├── pom.xml
-    └── src/main/java/com/interview/structures/...
+    └── src/main/java/com/interview/structures/
+        ├── list/       # DynamicArray, SmartList
+        ├── tree/       # BST, Heap, Trie
+        ├── map/        # HashMap, LRU
+        ├── linear/     # Stack, Queue
+        └── graph/      # Graph Algorithms
 ```
 
 ### Installation & Build

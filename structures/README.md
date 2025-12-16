@@ -3,6 +3,32 @@
 ## Overview
 This module explores fundamental **Data Structures** by implementing them from scratch or solving classic interview problems. It avoids standard Java Collections to demonstrate lower-level understanding of memory, pointers, and algorithmic complexity.
 
+## Package Organization
+To maintain clarity, the module is refactored into logical sub-packages:
+
+### `com.interview.structures.list`
+- `DynamicArray`: Resizable generic array.
+- `ParallelSmartList`: Optimized parallel stream processing.
+
+### `com.interview.structures.tree`
+- `BinarySearchTree`: Recursive BST.
+- `MinHeap`: Array-based binary heap.
+- `Trie`: Prefix tree for string operations.
+
+### `com.interview.structures.map`
+- `CustomHashMap`: Chaining implementation.
+- `LRUCache`: LinkedHashMap simulation.
+- `SoftCache`: Memory-sensitive caching.
+
+### `com.interview.structures.linear`
+- `CustomStack`, `MinStack`: Array and Multi-Stack implementations.
+- `MyDeque`, `QueueUsingStack`: Node-based and Algorithmic queues.
+- `SimpleBlockingQueue`: Concurrency primitives.
+- `BalancedParentheses`: Stack application.
+
+### `com.interview.structures.graph`
+- `Graph`: Adjacency list implementation (BFS/DFS).
+
 ## Components
 
 ### 1. `ParallelSmartList` (Custom Spliterator)
@@ -92,6 +118,16 @@ A Thread-Safe Stack that uses **No Locks** (`synchronized`).
 - **Algorithm**: Read Head -> Create New Node -> Try to Swap Head.
 - **Loop**: `while(!head.compareAndSet(old, new)) check...`
 - **Why**: "Wait-free" or "Lock-free" algorithms prevent thread starvation and deadlock.
+
+### 17. `FastBeanCopier` (MethodHandles)
+Demonstrates **Modern Reflection** (`java.lang.invoke`).
+- **Concept**: `MethodHandles.Lookup` creates direct pointers to methods.
+- **Performance**: Faster than legacy `Method.invoke()` because the JVM can optimize/inline them better.
+
+### 18. `LargeFileProcessor` (Memory Mapped IO)
+Demonstrates **Zero-Copy IO** (`MappedByteBuffer`).
+- **Concept**: Maps a file directly into the application's virtual memory address space.
+- **Benefit**: The OS handles page swapping. The app reads "memory" without copying data from Kernel buffer to User buffer. Essential for high-performance DBs (like Kafka/Cassandra).
 
 ---
 

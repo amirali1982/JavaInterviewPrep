@@ -1,5 +1,8 @@
 package com.interview.structures;
 
+import com.interview.structures.tree.BinarySearchTree;
+import com.interview.structures.tree.Trie;
+import com.interview.structures.graph.Graph;
 import org.junit.jupiter.api.Test;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;

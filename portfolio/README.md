@@ -7,10 +7,29 @@ This module demonstrates a clean, thread-safe implementation of a simple Portfol
 1.  **Sealed Classes** (Java 17): `Asset` is a `sealed` class, strictly permitting only `Stock` and `Bond` subclasses. This enforces a known hierarchy.
 2.  **Modern Async**: `AnalysisService` uses `CompletableFuture` for non-blocking, parallel market analysis.
 3.  **Generics**: `GenericRepository<T extends Asset>` demonstrates usage of **Bounded Type Parameters** and ID-based registry logic.
-4.  **Thread Safety**: The `Portfolio` class uses `ConcurrentHashMap` to manage holdings, allowing safe concurrent updates.
-5.  **Encapsulation**: The internal map is not exposed directly; only business methods are public.
+4.  **Modern Syntax**: Utilizes Java 14-17 features like **Pattern Matching for instanceof** and **Switch Expressions** for cleaner, more expressive logic.
+5.  **Clean Architecture**: Separation of concerns into `domain`, `service`, and `repository` layers.
+
+## Package Architecture
+The module is refactored into a standard layered architecture:
+
+### `com.interview.portfolio.domain`
+- **Core Entities**: `Asset`, `Stock`, `Bond`, `RestrictedStock`.
+- **Containers**: `Portfolio` (Thread-safe holdings).
+
+### `com.interview.portfolio.service`
+- **Business Logic**: `PortfolioService`, `PortfolioProfitCalculator`.
+- **Advanced Features**: `AnalysisService` (Async), `StreamAnalytics` (Streams), `ReflectiveAssetInspector` (Reflection).
+
+### `com.interview.portfolio.repository`
+- **Data Access**: `GenericRepository` (Interface), `MapBasedGenericRepository` (Implementation).
 
 ## Implementation Concepts
+
+### Modern Java Syntax (Java 14-17)
+We implemented `PortfolioProfitCalculator` to demonstrate cleaner code:
+- **Pattern Matching**: `if (asset instanceof Stock s)` eliminates explicit casting.
+- **Switch Expressions**: `return switch(sector) { ... };` allows assignment of switch results and compile-time exhaustiveness.
 
 ### Sealed Interface Hierarchy (Java 17)
 We refactored the legacy abstract class to a **Sealed Class Hierarchy**:

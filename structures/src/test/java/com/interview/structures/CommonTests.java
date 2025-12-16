@@ -1,5 +1,6 @@
 package com.interview.structures;
 
+import com.interview.structures.linear.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

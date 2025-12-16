@@ -1,5 +1,8 @@
 package com.interview.portfolio;
 
+import com.interview.portfolio.repository.MapBasedGenericRepository;
+import com.interview.portfolio.domain.Asset;
+import com.interview.portfolio.domain.Stock;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

@@ -1,5 +1,12 @@
 package com.interview.portfolio;
 
+import com.interview.portfolio.repository.GenericRepository;
+import com.interview.portfolio.repository.MapBasedGenericRepository;
+import com.interview.portfolio.domain.Stock;
+import com.interview.portfolio.domain.Asset;
+import com.interview.portfolio.domain.Bond;
+import com.interview.portfolio.domain.RestrictedStock;
+import com.interview.portfolio.service.ReflectiveAssetInspector;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

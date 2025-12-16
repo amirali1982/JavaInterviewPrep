@@ -1,5 +1,10 @@
 package com.interview.portfolio;
 
+import com.interview.portfolio.service.AnalysisService;
+import com.interview.portfolio.domain.Asset;
+import com.interview.portfolio.domain.Stock;
+import com.interview.portfolio.domain.Bond;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

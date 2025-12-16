@@ -1,9 +1,9 @@
 package com.interview.portfolio.proxy;
 
-import com.interview.portfolio.Asset;
-import com.interview.portfolio.GenericRepository;
-import com.interview.portfolio.MapBasedGenericRepository;
-import com.interview.portfolio.Stock;
+import com.interview.portfolio.domain.Asset;
+import com.interview.portfolio.repository.GenericRepository;
+import com.interview.portfolio.repository.MapBasedGenericRepository;
+import com.interview.portfolio.domain.Stock;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
